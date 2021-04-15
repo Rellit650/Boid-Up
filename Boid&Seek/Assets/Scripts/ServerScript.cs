@@ -63,15 +63,20 @@ public class ServerScript : MonoBehaviour
             {
                 if (cmd == NetworkEvent.Type.Data)
                 {
-                    uint number = stream.ReadUInt();
+                    byte messageID = stream.ReadByte();
+                    if((MessageIDs)messageID == MessageIDs.CHAT_MSG)
+                    {
+                        FixedString128 msgString = stream.ReadFixedString128();
 
-                    Debug.Log("Got " + number + " from the Client adding + 2 to it.");
-                    number += 2;
+                        Debug.Log("Got " + messageID + " as the message ID");
+                        Debug.Log("Got " + msgString + " as the message");
+                    }
+                    //number += 2;
 
-                    DataStreamWriter writer;
-                    m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer, 0);
-                    writer.WriteUInt(number);
-                    m_Driver.EndSend(writer);
+                    //DataStreamWriter writer;
+                    //m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer, 0);
+                    //writer.WriteUInt(number);
+                    //m_Driver.EndSend(writer);
                 }
                 else if (cmd == NetworkEvent.Type.Disconnect)
                 {

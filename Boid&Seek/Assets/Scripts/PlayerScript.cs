@@ -48,12 +48,13 @@ public class PlayerScript : MonoBehaviour
             if (cmd == NetworkEvent.Type.Connect)
             {
                 Debug.Log("We are now connected to the server");
-
+                /*
                 uint value = 1;
                 DataStreamWriter writer;
                 m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer, 0);
                 writer.WriteUInt(value);
                 m_Driver.EndSend(writer);
+                */
             }
             else if (cmd == NetworkEvent.Type.Data)
             {
@@ -69,5 +70,13 @@ public class PlayerScript : MonoBehaviour
                 m_Connection = default(NetworkConnection);
             }
         }
+    }
+
+    public virtual void SendMessage(NetworkingMessages msg)
+    {
+        DataStreamWriter writer;
+        m_Driver.BeginSend(m_Connection, out writer);
+        msg.Serialize(ref writer);
+        m_Driver.EndSend(writer);
     }
 }
