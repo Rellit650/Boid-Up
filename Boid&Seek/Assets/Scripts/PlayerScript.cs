@@ -34,7 +34,12 @@ public class PlayerScript : MonoBehaviour
                 Debug.Log("Something went wrong during connect");
             return;
         }
+        HandleMessages();
+    }
 
+    void HandleMessages()
+    {
+        //Handle Messages
         DataStreamReader stream;
         NetworkEvent.Type cmd;
 

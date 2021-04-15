@@ -48,7 +48,11 @@ public class ServerScript : MonoBehaviour
             m_Connections.Add(c);
             Debug.Log("Accepted a connection");
         }
+        HandleMessages();
+    }
 
+    void HandleMessages()
+    {
         DataStreamReader stream;
         for (int i = 0; i < m_Connections.Length; i++)
         {
