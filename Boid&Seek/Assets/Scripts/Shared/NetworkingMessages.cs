@@ -10,7 +10,16 @@ public class NetworkingMessages
     {
 
     }
-    public virtual void Deserialize()
+    public virtual void Deserialize(DataStreamReader reader)
+    {
+
+    }
+
+    public virtual void ReceivedOnClient()
+    {
+
+    }
+    public virtual void ReceivedOnServer(ServerScript server)
     {
 
     }

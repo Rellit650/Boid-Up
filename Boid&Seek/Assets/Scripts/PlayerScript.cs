@@ -48,21 +48,10 @@ public class PlayerScript : MonoBehaviour
             if (cmd == NetworkEvent.Type.Connect)
             {
                 Debug.Log("We are now connected to the server");
-                /*
-                uint value = 1;
-                DataStreamWriter writer;
-                m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer, 0);
-                writer.WriteUInt(value);
-                m_Driver.EndSend(writer);
-                */
             }
             else if (cmd == NetworkEvent.Type.Data)
             {
-                uint value = stream.ReadUInt();
-                Debug.Log("Got the value = " + value + " back from the server");
-                m_Done = true;
-                m_Connection.Disconnect(m_Driver);
-                m_Connection = default(NetworkConnection);
+                HandleMessageTypes(stream);
             }
             else if (cmd == NetworkEvent.Type.Disconnect)
             {
@@ -71,6 +60,34 @@ public class PlayerScript : MonoBehaviour
             }
         }
     }
+
+    public virtual void HandleMessageTypes(DataStreamReader stream)
+    {
+        NetworkingMessages message = null;
+        MessageIDs msgID = (MessageIDs)stream.ReadByte();
+        switch (msgID)
+        {
+            case MessageIDs.CHAT_MSG:
+                {
+                    message = new NetMessage_Chat(stream);
+                    break;
+                }
+
+            case MessageIDs.PLAYER_POS_UPDATE:
+                {
+                    message = new NetMessage_PlayerPos(stream);
+                    break;
+                }
+            default:
+                {
+                    Debug.Log("Recieved message has no ID");
+                    break;
+                }
+        }
+
+        message.ReceivedOnClient();
+    }
+
 
     public virtual void SendMessage(NetworkingMessages msg)
     {

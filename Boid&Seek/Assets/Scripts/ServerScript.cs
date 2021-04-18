@@ -63,20 +63,7 @@ public class ServerScript : MonoBehaviour
             {
                 if (cmd == NetworkEvent.Type.Data)
                 {
-                    byte messageID = stream.ReadByte();
-                    if((MessageIDs)messageID == MessageIDs.CHAT_MSG)
-                    {
-                        FixedString128 msgString = stream.ReadFixedString128();
-
-                        Debug.Log("Got " + messageID + " as the message ID");
-                        Debug.Log("Got " + msgString + " as the message");
-                    }
-                    //number += 2;
-
-                    //DataStreamWriter writer;
-                    //m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer, 0);
-                    //writer.WriteUInt(number);
-                    //m_Driver.EndSend(writer);
+                    HandleMessageTypes(stream);
                 }
                 else if (cmd == NetworkEvent.Type.Disconnect)
                 {
@@ -85,5 +72,51 @@ public class ServerScript : MonoBehaviour
                 }
             }
         }
+    }
+
+    public virtual void HandleMessageTypes(DataStreamReader stream)
+    {
+        NetworkingMessages message = null;
+        MessageIDs msgID = (MessageIDs)stream.ReadByte();
+        switch (msgID)
+        {
+            case MessageIDs.CHAT_MSG:
+            {
+                message = new NetMessage_Chat(stream);
+                break;
+            }
+            
+            case MessageIDs.PLAYER_POS_UPDATE:
+            {
+                message = new NetMessage_PlayerPos(stream);
+                break;
+            }
+            default:
+            {
+                Debug.Log("Recieved message has no ID");
+                break;
+            }
+        }
+
+        message.ReceivedOnServer(this);
+    }
+
+    public virtual void Broadcast(NetworkingMessages message)
+    {
+        for(int i = 0; i<m_Connections.Length; i++)
+        {
+            if(m_Connections[i].IsCreated)
+            {
+                SendMessage(m_Connections[i], message);
+            }
+        }
+    }
+
+    public virtual void SendMessage(NetworkConnection singleConnection, NetworkingMessages msg)
+    {
+        DataStreamWriter writer;
+        m_Driver.BeginSend(singleConnection, out writer);
+        msg.Serialize(ref writer);
+        m_Driver.EndSend(writer);
     }
 }
