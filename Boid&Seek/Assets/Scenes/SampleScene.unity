@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641258, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -800,7 +800,7 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -957,6 +957,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57ed31ccc604af4da7fb33e327c7b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sizeOfGame: 1
+  flocks: []
+  boid: {fileID: 5473490180797386385, guid: b359b1569d13d25428e7547feb4ed75d, type: 3}
+  spawnRangeX: 0
+  spawnRangeZ: 0
+  numBoidsInFlocks: 150
+  neighborhoodSize: 0
+  separateRadius: 0
+  distanceFromCenter: 0
+  AlignWeight: 0
+  CohesionWeight: 0
+  SeparateWeight: 0
+  ReturnToCenterWeight: 0
 --- !u!114 &1694846794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1064,7 +1077,7 @@ GameObject:
   - component: {fileID: 1816047399}
   - component: {fileID: 1816047398}
   - component: {fileID: 1816047403}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1264,7 +1277,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1921985177}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -25.84, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 10}
   m_Children: []
   m_Father: {fileID: 0}

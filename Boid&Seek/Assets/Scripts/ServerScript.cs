@@ -1,11 +1,26 @@
 using UnityEngine;
 using UnityEngine.Assertions;
+using System.Collections.Generic;
 
 using Unity.Collections;
 using Unity.Networking.Transport;
 
+public enum gameSize
+{
+    //VerySmall,
+    Small,
+    Average,
+    Large,
+    VeryLarge
+}
+
 public class ServerScript : MonoBehaviour
 {
+    public gameSize sizeOfGame;
+    public List<GameObject> flocks;
+    public GameObject boid;
+    public float spawnRangeX, spawnRangeZ, numBoidsInFlocks, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
+
     public NetworkDriver m_Driver;
     private NativeList<NetworkConnection> m_Connections;
 
@@ -20,6 +35,98 @@ public class ServerScript : MonoBehaviour
             m_Driver.Listen();
 
         m_Connections = new NativeList<NetworkConnection>(16, Allocator.Persistent);
+
+
+        switch (sizeOfGame)
+        {/*
+            case gameSize.VerySmall:
+                {
+                    spawnRangeX = 7;
+                    spawnRangeZ = 7;
+                    numBoidsInFlocks = 30;
+                    neighborhoodSize = 10f;
+                    separateRadius = 2.5f;
+                    distanceFromCenter = 10f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1f;
+                    ReturnToCenterWeight = 3f;
+                    break;
+
+                }
+            case gameSize.Small:
+                {
+                    spawnRangeX = 8;
+                    spawnRangeZ = 8;
+                    numBoidsInFlocks = 50;
+                    neighborhoodSize = 10f;
+                    separateRadius = 2.5f;
+                    distanceFromCenter = 15f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1f;
+                    ReturnToCenterWeight = 3f;
+                    break;
+                }
+            case gameSize.Large:
+                {
+                    spawnRangeX = 10;
+                    spawnRangeZ = 10;
+                    numBoidsInFlocks = 90;
+                    neighborhoodSize = 10f;
+                    separateRadius = 2.5f;
+                    distanceFromCenter = 15f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1.2f;
+                    ReturnToCenterWeight = 3f;
+                    break;
+                }
+            case gameSize.VeryLarge:
+                {
+                    spawnRangeX = 11;
+                    spawnRangeZ = 11;
+                    numBoidsInFlocks = 110;
+                    neighborhoodSize = 10f;
+                    separateRadius = 2.5f;
+                    distanceFromCenter = 20f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1.3f;
+                    ReturnToCenterWeight = 3f;
+                    break;
+                }*/
+            case gameSize.Average:
+            default:
+                {
+                    spawnRangeX = 9;
+                    spawnRangeZ = 9;
+                    numBoidsInFlocks = 70;
+                    neighborhoodSize = 10f;
+                    separateRadius = 2.5f;
+                    distanceFromCenter = 15f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1.1f;
+                    ReturnToCenterWeight = 3f;
+                    break;
+                }
+        }
+        
+        for (int j = 0; j < numBoidsInFlocks; ++j)
+        {
+            GameObject thing = Instantiate(boid, new Vector3(Random.Range(-spawnRangeX, spawnRangeX), 0, Random.Range(-spawnRangeZ, spawnRangeZ)), Quaternion.identity);
+            FlockAI theThingThing = thing.GetComponent<FlockAI>();
+            theThingThing.neighborhoodSize = neighborhoodSize;
+            theThingThing.separateRadius = separateRadius;
+            theThingThing.distanceFromCenter = distanceFromCenter;
+            theThingThing.AlignWeight = AlignWeight;
+            theThingThing.CohesionWeight = CohesionWeight;
+            theThingThing.SeparateWeight = SeparateWeight;
+            theThingThing.ReturnToCenterWeight = ReturnToCenterWeight;
+            flocks.Add(thing);
+        }
+        
     }
 
     public void OnDestroy()
@@ -49,6 +156,7 @@ public class ServerScript : MonoBehaviour
             Debug.Log("Accepted a connection");
         }
         HandleMessages();
+        HandleFlock();
     }
 
     void HandleMessages()
@@ -118,5 +226,14 @@ public class ServerScript : MonoBehaviour
         m_Driver.BeginSend(singleConnection, out writer);
         msg.Serialize(ref writer);
         m_Driver.EndSend(writer);
+    }
+
+
+    void HandleFlock()
+    {
+        for(int i = 0; i < numBoidsInFlocks; ++i)
+        {
+            flocks[i].GetComponent<FlockAI>().flock();
+        }
     }
 }
