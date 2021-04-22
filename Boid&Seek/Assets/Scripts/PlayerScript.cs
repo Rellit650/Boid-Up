@@ -9,6 +9,13 @@ public class PlayerScript : MonoBehaviour
     public NetworkConnection m_Connection;
     public bool m_Done;
 
+    [SerializeField]
+    private GameObject NetworkedPlayerPrefab;
+
+    private int playerID;
+
+    private List<GameObject> NetworkedPlayerList =  new List<GameObject>(); 
+
     void Start()
     {
         m_Driver = NetworkDriver.Create();
@@ -17,6 +24,15 @@ public class PlayerScript : MonoBehaviour
         var endpoint = NetworkEndPoint.LoopbackIpv4;
         endpoint.Port = 9000;
         m_Connection = m_Driver.Connect(endpoint);
+
+        StartCoroutine(DelayCommand());
+    }
+
+    IEnumerator DelayCommand() 
+    {
+        yield return new WaitForSeconds(0.7f);
+        NetworkingMessages message = new NetMessage_PlayerJoin(0, gameObject.transform.position.x,gameObject.transform.position.z);
+        SendMessage(message);
     }
 
     public void OnDestroy()
@@ -35,6 +51,12 @@ public class PlayerScript : MonoBehaviour
             return;
         }
         HandleMessages();
+        
+    }
+
+    void sendPositionUpdate() 
+    {
+        
     }
 
     void HandleMessages()
@@ -76,6 +98,26 @@ public class PlayerScript : MonoBehaviour
             case MessageIDs.PLAYER_POS_UPDATE:
                 {
                     message = new NetMessage_PlayerPos(stream);
+                    NetMessage_PlayerPos castRef = (NetMessage_PlayerPos)message;
+                    UpdateNetworkedPlayer(castRef.playerIDNum, castRef.playerXPos, castRef.playerZPos);
+                    break;
+                }
+            case MessageIDs.PLAYER_JOIN: 
+                {
+                    message = new NetMessage_PlayerJoin(stream);
+                    NetMessage_PlayerJoin castRef = (NetMessage_PlayerJoin)message;
+                    GameObject temp = Instantiate(NetworkedPlayerPrefab, new Vector3(castRef.playerXPos, 3.5f, castRef.playerZPos), Quaternion.identity);
+                    //This is for handling other players so we set the id here for them
+                    temp.GetComponent<NetworkedPlayerScript>().playerID = castRef.playerIDNum;
+                    NetworkedPlayerList.Add(temp);                  
+                    break;
+                }
+            case MessageIDs.PLAYER_SETID: 
+                {
+                    message = new NetMessage_PlayerIDSet(stream);
+                    NetMessage_PlayerIDSet castRef = (NetMessage_PlayerIDSet)message;
+                    playerID = castRef.playerIDNum;
+                    Debug.Log(castRef.playerIDNum);
                     break;
                 }
             default:
@@ -95,5 +137,19 @@ public class PlayerScript : MonoBehaviour
         m_Driver.BeginSend(m_Connection, out writer);
         msg.Serialize(ref writer);
         m_Driver.EndSend(writer);
+    }
+
+    void UpdateNetworkedPlayer(int nPlayerID, float xPos, float zPos) 
+    {
+        for (int i = 0; i < NetworkedPlayerList.Count; i++) 
+        {
+            if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
+            {
+                Vector3 newPos = NetworkedPlayerList[i].transform.position;
+                newPos.x = xPos;
+                newPos.z = zPos;
+                return;
+            }
+        }
     }
 }
