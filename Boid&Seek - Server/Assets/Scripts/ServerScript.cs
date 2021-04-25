@@ -16,7 +16,7 @@ public enum gameSize
 
 public class ServerScript : MonoBehaviour
 {
-    public const int MAX_CONNECTIONS = 10;
+    public const int MAX_CONNECTIONS = 2;
     public gameSize sizeOfGame;
     public List<GameObject> flocks;
     public GameObject boid;
@@ -24,7 +24,7 @@ public class ServerScript : MonoBehaviour
 
     public NetworkDriver m_Driver;
     private NativeList<NetworkConnection> m_Connections;
-    private int[] playerIDArray = new int[MAX_CONNECTIONS];
+    //private int[] playerIDArray = new int[MAX_CONNECTIONS];
     private GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
 
     void Start()
@@ -40,7 +40,7 @@ public class ServerScript : MonoBehaviour
         m_Connections = new NativeList<NetworkConnection>(MAX_CONNECTIONS, Allocator.Persistent);
 
         //set playerIds to -1
-        resetPlayerIDs();
+        //resetPlayerIDs();
         /*
         switch (sizeOfGame)
         {/*
@@ -134,6 +134,7 @@ public class ServerScript : MonoBehaviour
         */
     }
 
+    /*
     private void resetPlayerIDs()
     {
         for (uint i = 0; i < playerIDArray.Length; i++)
@@ -141,6 +142,7 @@ public class ServerScript : MonoBehaviour
             playerIDArray[i] = -1;
         }
     }
+    */
 
     public void OnDestroy()
     {
@@ -175,11 +177,12 @@ public class ServerScript : MonoBehaviour
 
     void HandlePlayerJoin(NetworkConnection joiner)
     {
-        for (int i = 0; i < playerIDArray.Length; i++)
+        for (int i = 0; i < playerGameObjectArray.Length; i++)
         {
-            if (playerIDArray[i] == -1)
+            if (playerGameObjectArray[i] == null)
             {
-                playerIDArray[i] = i;
+                //Set GameObject Data later
+                playerGameObjectArray[i] = new GameObject();
                 NetworkingMessages message = new NetMessage_PlayerIDSet(i);
                 SendMessage(joiner, message);
                 return;
@@ -238,12 +241,15 @@ public class ServerScript : MonoBehaviour
                     //Need to figure out how to get all other players as well
                     Broadcast(message, sender);
                     //SpawnAllOtherPlayers
-                    for(int i = 0; i < m_Connections.Length; i++) //Is i going to be the player ID index? If so, this should work but it feels wrong
+
+                    NetMessage_PlayerJoin castRef = (NetMessage_PlayerJoin)message;
+
+                    for(int i = 0; i < playerGameObjectArray.Length; i++) //Is i going to be the player ID index? If so, this should work but it feels wrong
                     {
                         //Loop through all connections, send a "Player Joined message back to the new player so that all the current players spawn in
-                        if (sender != m_Connections[i] && m_Connections[i].IsCreated)   //If the connection is not the sender and it has been created already
+                        if (castRef.playerIDNum != i && playerGameObjectArray[i] != null)   //If the connection is not the sender and it has been created already
                         {
-                            NetMessage_PlayerJoin addPlayer = new NetMessage_PlayerJoin(playerIDArray[i], playerGameObjectArray[i].transform.position.x, playerGameObjectArray[i].transform.position.z);
+                            NetMessage_PlayerJoin addPlayer = new NetMessage_PlayerJoin(i, playerGameObjectArray[i].transform.position.x, playerGameObjectArray[i].transform.position.z);
                             SendMessage(sender, addPlayer);
                         }
                     }
@@ -258,6 +264,7 @@ public class ServerScript : MonoBehaviour
         message.ReceivedOnServer(this);
     }
 
+    /*
     void spawnAllOtherPlayers() 
     {
         for (int i = 0; i < playerGameObjectArray.Length; i++) 
@@ -268,7 +275,7 @@ public class ServerScript : MonoBehaviour
             }
         }
     }
-
+    */
     void storePlayer(NetMessage_PlayerPos m) 
     {
         if (playerGameObjectArray[m.playerIDNum] != null)

@@ -983,6 +983,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Done: 0
+  NetworkedPlayerPrefab: {fileID: 7102094013820773566, guid: 62d4e84b3fd1f724c86ab42356e490f5, type: 3}
 --- !u!4 &1694846795
 Transform:
   m_ObjectHideFlags: 0

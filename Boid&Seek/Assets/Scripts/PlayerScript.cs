@@ -108,7 +108,15 @@ public class PlayerScript : MonoBehaviour
                     NetMessage_PlayerJoin castRef = (NetMessage_PlayerJoin)message;
                     GameObject temp = Instantiate(NetworkedPlayerPrefab, new Vector3(castRef.playerXPos, 3.5f, castRef.playerZPos), Quaternion.identity);
                     //This is for handling other players so we set the id here for them
-                    temp.GetComponent<NetworkedPlayerScript>().playerID = castRef.playerIDNum;
+                    if (playerID == 0)
+                    {
+                        temp.GetComponent<NetworkedPlayerScript>().playerID = 1;
+                    }
+                    else 
+                    {
+                        temp.GetComponent<NetworkedPlayerScript>().playerID = 0;
+                    }
+                    
                     NetworkedPlayerList.Add(temp);                  
                     break;
                 }
@@ -141,6 +149,7 @@ public class PlayerScript : MonoBehaviour
 
     void UpdateNetworkedPlayer(int nPlayerID, float xPos, float zPos) 
     {
+        Debug.Log("update network player");
         for (int i = 0; i < NetworkedPlayerList.Count; i++) 
         {
             if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
@@ -148,8 +157,14 @@ public class PlayerScript : MonoBehaviour
                 Vector3 newPos = NetworkedPlayerList[i].transform.position;
                 newPos.x = xPos;
                 newPos.z = zPos;
+                NetworkedPlayerList[i].transform.position = newPos;
                 return;
             }
         }
+    }
+
+    public int getPlayerID() 
+    {
+        return playerID;
     }
 }

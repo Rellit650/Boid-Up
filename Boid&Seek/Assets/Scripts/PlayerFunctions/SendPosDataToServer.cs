@@ -18,7 +18,7 @@ public class SendPosDataToServer : MonoBehaviour
     {
         if(Time.time - sendingTimer > updateTime)  //If it has been longer than [insert time], send position data to server
         {
-            NetMessage_PlayerPos playerPos = new NetMessage_PlayerPos(7, transform.position.x, transform.position.z);
+            NetMessage_PlayerPos playerPos = new NetMessage_PlayerPos(client.getPlayerID(), transform.position.x, transform.position.z);
             client.SendMessage(playerPos);
             sendingTimer = Time.time;
         }
