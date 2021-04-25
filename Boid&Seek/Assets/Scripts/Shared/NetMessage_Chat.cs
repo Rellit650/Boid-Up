@@ -48,5 +48,6 @@ public class NetMessage_Chat : NetworkingMessages   //Inheriting from networking
     public override void ReceivedOnClient()
     {
         Debug.Log("Client recieved message: " + chatMsg);
+        //Display the message on UI
     }
 }

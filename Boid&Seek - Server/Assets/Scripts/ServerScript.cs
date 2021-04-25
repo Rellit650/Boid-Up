@@ -238,6 +238,15 @@ public class ServerScript : MonoBehaviour
                     //Need to figure out how to get all other players as well
                     Broadcast(message, sender);
                     //SpawnAllOtherPlayers
+                    for(int i = 0; i < m_Connections.Length; i++) //Is i going to be the player ID index? If so, this should work but it feels wrong
+                    {
+                        //Loop through all connections, send a "Player Joined message back to the new player so that all the current players spawn in
+                        if (sender != m_Connections[i] && m_Connections[i].IsCreated)   //If the connection is not the sender and it has been created already
+                        {
+                            NetMessage_PlayerJoin addPlayer = new NetMessage_PlayerJoin(playerIDArray[i], playerGameObjectArray[i].transform.position.x, playerGameObjectArray[i].transform.position.z);
+                            SendMessage(sender, addPlayer);
+                        }
+                    }
                     break;
                 }
             default:

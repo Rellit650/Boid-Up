@@ -24,6 +24,7 @@ public class ServerScript : MonoBehaviour
     public NetworkDriver m_Driver;
     private NativeList<NetworkConnection> m_Connections;
 
+
     void Start()
     {
         m_Driver = NetworkDriver.Create();
