@@ -14,7 +14,8 @@ public class PlayerScript : MonoBehaviour
 
     private int playerID;
 
-    private List<GameObject> NetworkedPlayerList =  new List<GameObject>(); 
+    private List<GameObject> NetworkedPlayerList =  new List<GameObject>();
+    private Vector3 desiredPos;
 
     void Start()
     {
@@ -51,14 +52,28 @@ public class PlayerScript : MonoBehaviour
             return;
         }
         HandleMessages();
+        HandleDeadReckoning();
         
     }
 
-    void sendPositionUpdate() 
+    void HandleDeadReckoning() 
     {
+        if (playerID == 0)
+        {
+            if (NetworkedPlayerList[1] != null)
+            {
+                NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
+            }
+        }
+        else 
+        {
+            if (NetworkedPlayerList[0] != null)
+            {
+                NetworkedPlayerList[0].transform.position = Vector3.Lerp(NetworkedPlayerList[0].transform.position, desiredPos, 0.0625f);
+            }
+        }
         
     }
-
     void HandleMessages()
     {
         //Handle Messages
@@ -157,7 +172,8 @@ public class PlayerScript : MonoBehaviour
                 Vector3 newPos = NetworkedPlayerList[i].transform.position;
                 newPos.x = xPos;
                 newPos.z = zPos;
-                NetworkedPlayerList[i].transform.position = newPos;
+                //NetworkedPlayerList[i].transform.position = newPos;
+                desiredPos = newPos;
                 return;
             }
         }
