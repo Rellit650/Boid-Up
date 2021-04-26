@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public enum Difficulty
 {
@@ -14,24 +15,29 @@ public class AIScript : MonoBehaviour
     public float moveSpeed = 3f;
     public bool isSeeker = false;
     public Difficulty difficulty;
-    List<GameObject> allPlayers, allAI, inVision;
+    public GameObject destination;
+    public List<GameObject> allPlayers, allAI, inVision;
     GameObject theSeeker = null;
+    NavMeshAgent agent;
+    
 
-    float luckValue, visionRadius;
+    public float luckValue, visionRadius = 3;
     float WanderWeight = 1, AIweight = 2;
     Vector2 wanderPointXZ;
     // Start is called before the first frame update
     void Start()
     {
+        agent = gameObject.GetComponent<NavMeshAgent>();
+
         //set random rotation so AIs wander in different directions
         transform.forward = new Vector3(Random.Range(-180, 180), 0, Random.Range(-180, 180));
 
         //find all AI and Players in game
         foreach (GameObject g in GameObject.FindObjectsOfType<GameObject>())
         {
-            if (g.gameObject.name.Contains("Player"))
+            if (g.gameObject.name.Equals("Player"))
                 allPlayers.Add(g.gameObject);
-            else if (g.gameObject.name.Contains("AI") && g.gameObject != gameObject)
+            else if (g.gameObject.name.Equals("AI") && g.gameObject != gameObject)
                 allAI.Add(g.gameObject);
         }
 
@@ -87,14 +93,14 @@ public class AIScript : MonoBehaviour
     {
         foreach(GameObject p in allPlayers)
         {
-            if(Vector2.Distance(new Vector2(p.transform.position.x, p.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < visionRadius)
+            if(Vector2.Distance(new Vector2(p.transform.position.x, p.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < visionRadius && !inVision.Contains(p))
             {
                 inVision.Add(p.gameObject);
             }
         }
         foreach (GameObject ai in allAI)
         {
-            if (Vector2.Distance(new Vector2(ai.transform.position.x, ai.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < visionRadius)
+            if (Vector2.Distance(new Vector2(ai.transform.position.x, ai.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < visionRadius && !inVision.Contains(ai))
             {
                 inVision.Add(ai.gameObject);
             }
@@ -122,9 +128,12 @@ public class AIScript : MonoBehaviour
 
         vel = (Wander().normalized * WanderWeight) + (AImove * AIweight);
         vel.Normalize();
-
+        vel.y = 1.5f;
+        destination.transform.position = transform.position + vel;
+        agent.SetDestination(destination.transform.position);
+        /*
         transform.forward = vel;
-        transform.position += vel * Time.deltaTime;
+        transform.position += vel * Time.deltaTime;*/
     }
 
     //Wander around until character is in vision radius
@@ -139,6 +148,19 @@ public class AIScript : MonoBehaviour
     Vector3 Pursuit()
     {
         Vector3 pursuit = Vector3.zero;
+        GameObject obj = null;
+        if (inVision.Count >= 1)
+            obj = inVision[0];
+        if (inVision.Count > 1)
+        {
+            for (int i = 1; i < inVision.Count - 2; ++i)
+            {
+                if (Vector3.Distance(obj.transform.position, transform.position) > Vector3.Distance(inVision[i].transform.position, transform.position) )
+                    obj = inVision[i];
+            }
+        }
+        if (obj != null)
+            pursuit = obj.transform.position - transform.position;
 
         return new Vector3(pursuit.x, 0, pursuit.z);
     }

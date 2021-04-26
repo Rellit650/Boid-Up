@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
-
+using System.Collections;
 using Unity.Collections;
 using Unity.Networking.Transport;
+using UnityEngine.AI;
+
 
 public enum gameSize
 {
@@ -82,21 +84,21 @@ public class ServerScript : MonoBehaviour
                     SeparateWeight = 1.2f;
                     ReturnToCenterWeight = 3f;
                     break;
-                }
+                }*/
             case gameSize.VeryLarge:
                 {
                     spawnRangeX = 11;
                     spawnRangeZ = 11;
-                    numBoidsInFlocks = 110;
+                    numBoidsInFlocks = 130;
                     neighborhoodSize = 10f;
                     separateRadius = 2.5f;
-                    distanceFromCenter = 20f;
+                    distanceFromCenter = 35f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
-                    SeparateWeight = 1.3f;
+                    SeparateWeight = 1.2f;
                     ReturnToCenterWeight = 3f;
                     break;
-                }*/
+                }
             case gameSize.Average:
             default:
                 {
@@ -117,6 +119,7 @@ public class ServerScript : MonoBehaviour
         for (int j = 0; j < numBoidsInFlocks; ++j)
         {
             GameObject thing = Instantiate(boid, new Vector3(Random.Range(-spawnRangeX, spawnRangeX), 0, Random.Range(-spawnRangeZ, spawnRangeZ)), Quaternion.identity);
+            thing.transform.parent = this.gameObject.transform;
             FlockAI theThingThing = thing.GetComponent<FlockAI>();
             theThingThing.neighborhoodSize = neighborhoodSize;
             theThingThing.separateRadius = separateRadius;
@@ -127,7 +130,12 @@ public class ServerScript : MonoBehaviour
             theThingThing.ReturnToCenterWeight = ReturnToCenterWeight;
             flocks.Add(thing);
         }
-        
+        StartCoroutine(RemoveStationaryGround());
+    }
+    IEnumerator RemoveStationaryGround()
+    {
+        yield return new WaitForSeconds(3f);
+        Destroy(transform.GetChild(0).gameObject);
     }
 
     public void OnDestroy()
@@ -138,6 +146,7 @@ public class ServerScript : MonoBehaviour
 
     void Update()
     {
+        gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
         m_Driver.ScheduleUpdate().Complete();
 
         // CleanUpConnections
