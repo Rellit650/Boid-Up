@@ -8,13 +8,15 @@ public class PlayerScript : MonoBehaviour
     public NetworkDriver m_Driver;
     public NetworkConnection m_Connection;
     public bool m_Done;
+    public float m_DRDistance = 100.0f;
 
     [SerializeField]
     private GameObject NetworkedPlayerPrefab;
 
     private int playerID;
 
-    private List<GameObject> NetworkedPlayerList =  new List<GameObject>();
+    //private List<GameObject> NetworkedPlayerList =  new List<GameObject>();
+    private GameObject[] NetworkedPlayerList = new GameObject[2];
     private Vector3 desiredPos;
 
     void Start()
@@ -58,18 +60,36 @@ public class PlayerScript : MonoBehaviour
 
     void HandleDeadReckoning() 
     {
-        if (playerID == 0)
+        if (playerID == 0)  //Jank
         {
             if (NetworkedPlayerList[1] != null)
             {
-                NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
+                if (Vector3.Distance(NetworkedPlayerList[1].transform.position, desiredPos) < m_DRDistance)
+                {
+                    NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
+                    Debug.Log("Lerp");
+                }
+                else
+                {
+                    NetworkedPlayerList[1].transform.position = desiredPos;
+                    Debug.Log("TP");
+                }    
             }
         }
         else 
         {
             if (NetworkedPlayerList[0] != null)
             {
-                NetworkedPlayerList[0].transform.position = Vector3.Lerp(NetworkedPlayerList[0].transform.position, desiredPos, 0.0625f);
+                if (Vector3.Distance(NetworkedPlayerList[0].transform.position, desiredPos) < m_DRDistance)
+                {
+                    NetworkedPlayerList[0].transform.position = Vector3.Lerp(NetworkedPlayerList[0].transform.position, desiredPos, 0.0625f);
+                    Debug.Log("Lerp");
+                }
+                else
+                {
+                    NetworkedPlayerList[0].transform.position = desiredPos;
+                    Debug.Log("TP");
+                }
             }
         }
         
@@ -126,13 +146,15 @@ public class PlayerScript : MonoBehaviour
                     if (playerID == 0)
                     {
                         temp.GetComponent<NetworkedPlayerScript>().playerID = 1;
+                        NetworkedPlayerList[1] = temp;
                     }
                     else 
                     {
                         temp.GetComponent<NetworkedPlayerScript>().playerID = 0;
+                        NetworkedPlayerList[0] = temp;
                     }
                     
-                    NetworkedPlayerList.Add(temp);                  
+                    //NetworkedPlayerList.Add(temp);                  
                     break;
                 }
             case MessageIDs.PLAYER_SETID: 
@@ -165,16 +187,19 @@ public class PlayerScript : MonoBehaviour
     void UpdateNetworkedPlayer(int nPlayerID, float xPos, float zPos) 
     {
         Debug.Log("update network player");
-        for (int i = 0; i < NetworkedPlayerList.Count; i++) 
+        for (int i = 0; i < NetworkedPlayerList.Length; i++) 
         {
-            if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
+            if(NetworkedPlayerList[i] != null)
             {
-                Vector3 newPos = NetworkedPlayerList[i].transform.position;
-                newPos.x = xPos;
-                newPos.z = zPos;
-                //NetworkedPlayerList[i].transform.position = newPos;
-                desiredPos = newPos;
-                return;
+                if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
+                {
+                    Vector3 newPos = NetworkedPlayerList[i].transform.position;
+                    newPos.x = xPos;
+                    newPos.z = zPos;
+                    //NetworkedPlayerList[i].transform.position = newPos;
+                    desiredPos = newPos;
+                    return;
+                }
             }
         }
     }

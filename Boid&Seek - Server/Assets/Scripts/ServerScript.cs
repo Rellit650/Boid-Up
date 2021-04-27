@@ -146,8 +146,8 @@ public class ServerScript : MonoBehaviour
 
     public void OnDestroy()
     {
-        m_Driver.Dispose();
         m_Connections.Dispose();
+        m_Driver.Dispose();
     }
 
     void Update()
