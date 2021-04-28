@@ -16,11 +16,13 @@ public class SendPosDataToServer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*
         if(Time.time - sendingTimer > updateTime)  //If it has been longer than [insert time], send position data to server
         {
             NetMessage_PlayerPos playerPos = new NetMessage_PlayerPos(7, transform.position.x, transform.position.z);
             client.SendMessage(playerPos);
             sendingTimer = Time.time;
         }
+        */
     }
 }

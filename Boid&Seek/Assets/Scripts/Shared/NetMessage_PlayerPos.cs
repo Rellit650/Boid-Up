@@ -7,8 +7,9 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
     //first 8 bits for message IDs
     //rest of bits of size TBD for chat message string
     public int playerIDNum { get; set; }
-    public float playerXPos {get;set;}
-    public float playerZPos {get;set;}  //Since Y is vertical, I'm ignoring it for now
+    public short playerXPos {get;set;}
+    public short playerZPos {get;set;}  //Since Y is vertical, I'm ignoring it for now
+    public float playerCompressionScale { get; set; }
 
 
     public NetMessage_PlayerPos()
@@ -22,12 +23,14 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
         Deserialize(reader);
     }
 
-    public NetMessage_PlayerPos(int playerID, float xPos, float zPos)
+    public NetMessage_PlayerPos(int playerID, float xPos, float zPos, float compression)
     {
         msgID = MessageIDs.PLAYER_POS_UPDATE;
         playerIDNum = playerID;
-        playerXPos = xPos;
-        playerZPos = zPos;
+        //this will cause data loss, that's the point
+        playerXPos = (short)xPos;
+        playerZPos = (short)zPos;
+        playerCompressionScale = compression;
     }
 
 
@@ -35,17 +38,19 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
     {
         writer.WriteByte((byte)msgID);  //Most space-efficient way of handling messages, could also do write int
         writer.WriteInt(playerIDNum);
-        //Consider compressing?
-        writer.WriteFloat(playerXPos);
-        writer.WriteFloat(playerZPos);
+        //Compressing: CHANGE TO SHORTS SO NEGATIVES WORK
+        writer.WriteShort(playerXPos); //Causing issues with negative numbers here?
+        writer.WriteShort(playerZPos);
+        writer.WriteFloat(playerCompressionScale);
     }
 
     public override void Deserialize(DataStreamReader reader)   //Read all data from data stream to clear
     {
         //First byte already read on server to handle IDs, so no worries
         playerIDNum = reader.ReadInt();
-        playerXPos = reader.ReadFloat();
-        playerZPos = reader.ReadFloat();
+        playerXPos = reader.ReadShort();
+        playerZPos = reader.ReadShort();
+        playerCompressionScale = reader.ReadFloat();
     }
 
     public override void ReceivedOnServer(ServerScript server)

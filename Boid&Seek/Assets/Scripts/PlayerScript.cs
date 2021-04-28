@@ -134,7 +134,7 @@ public class PlayerScript : MonoBehaviour
                 {
                     message = new NetMessage_PlayerPos(stream);
                     NetMessage_PlayerPos castRef = (NetMessage_PlayerPos)message;
-                    UpdateNetworkedPlayer(castRef.playerIDNum, castRef.playerXPos, castRef.playerZPos);
+                    UpdateNetworkedPlayer(castRef.playerIDNum, castRef.playerXPos, castRef.playerZPos, castRef.playerCompressionScale);
                     break;
                 }
             case MessageIDs.PLAYER_JOIN: 
@@ -184,7 +184,7 @@ public class PlayerScript : MonoBehaviour
         m_Driver.EndSend(writer);
     }
 
-    void UpdateNetworkedPlayer(int nPlayerID, float xPos, float zPos) 
+    void UpdateNetworkedPlayer(int nPlayerID, short xPos, short zPos, float compressionScale) 
     {
         Debug.Log("update network player");
         for (int i = 0; i < NetworkedPlayerList.Length; i++) 
@@ -194,8 +194,8 @@ public class PlayerScript : MonoBehaviour
                 if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
                 {
                     Vector3 newPos = NetworkedPlayerList[i].transform.position;
-                    newPos.x = xPos;
-                    newPos.z = zPos;
+                    newPos.x = HubnerDC_Decompression(xPos, compressionScale);
+                    newPos.z = HubnerDC_Decompression(zPos, compressionScale);
                     //NetworkedPlayerList[i].transform.position = newPos;
                     desiredPos = newPos;
                     return;
@@ -207,5 +207,17 @@ public class PlayerScript : MonoBehaviour
     public int getPlayerID() 
     {
         return playerID;
+    }
+
+
+    float HubnerDC_Decompression(short position, float compDivisor)
+    {
+        float decompressed = (float)position;
+
+        //Re-scaling value back to original
+        decompressed = decompressed / 511.0f;
+        decompressed = decompressed * compDivisor;
+
+        return decompressed;
     }
 }

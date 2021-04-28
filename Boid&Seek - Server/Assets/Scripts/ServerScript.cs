@@ -280,12 +280,12 @@ public class ServerScript : MonoBehaviour
     {
         if (playerGameObjectArray[m.playerIDNum] != null)
         {
-            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(m.playerXPos, 3.5f, m.playerZPos);
+            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), 3.5f, HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
         }
         else 
         {
             playerGameObjectArray[m.playerIDNum] = new GameObject();
-            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(m.playerXPos, 3.5f, m.playerZPos);
+            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), 3.5f, HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
         }
     }
 
@@ -326,5 +326,15 @@ public class ServerScript : MonoBehaviour
         {
             flocks[i].GetComponent<FlockAI>().flock();
         }
+    }
+    float HubnerDC_Decompression(short position, float compDivisor)
+    {
+        float decompressed = (float)position;
+
+        //Re-scaling value back to original
+        decompressed = decompressed / 511.0f;
+        decompressed = decompressed * compDivisor;
+
+        return decompressed;
     }
 }
