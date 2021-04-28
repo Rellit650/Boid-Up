@@ -170,6 +170,16 @@ public class ServerScript : MonoBehaviour
             m_Connections.Add(c);
             HandlePlayerJoin(c);
             Debug.Log("Accepted a connection");
+
+            if (m_Connections.Length >= 2) 
+            {
+                Debug.Log("Do we get here");
+                for (int i = 0; i < playerGameObjectArray.Length; i++) 
+                {
+                    NetworkingMessages message = new NetMessage_GameStart((NetMessage_GameStart.Role)i);
+                    SendMessage(m_Connections[i], message);
+                }               
+            }
         }
         HandleMessages();
         //HandleFlock();
@@ -208,6 +218,7 @@ public class ServerScript : MonoBehaviour
                 {
                     Debug.Log("Client disconnected from server");
                     m_Connections[i] = default(NetworkConnection);
+                    Destroy(playerGameObjectArray[i]); 
                 }
             }
         }

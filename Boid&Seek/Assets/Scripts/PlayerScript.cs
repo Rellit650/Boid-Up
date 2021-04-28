@@ -54,8 +54,7 @@ public class PlayerScript : MonoBehaviour
             return;
         }
         HandleMessages();
-        HandleDeadReckoning();
-        
+        HandleDeadReckoning();      
     }
 
     void HandleDeadReckoning() 
@@ -163,6 +162,23 @@ public class PlayerScript : MonoBehaviour
                     NetMessage_PlayerIDSet castRef = (NetMessage_PlayerIDSet)message;
                     playerID = castRef.playerIDNum;
                     Debug.Log(castRef.playerIDNum);
+                    break;
+                }
+            case MessageIDs.GAME_START: 
+                {
+                    message = new NetMessage_GameStart(stream);
+                    NetMessage_GameStart castRef = (NetMessage_GameStart)message;
+
+                    Debug.Log("Game start call");
+
+                    if (castRef.playerRole == 0)
+                    {
+                        FindObjectOfType<GameStartScript>().SeekerStart(GameObject.FindGameObjectWithTag("Player"));
+                    }
+                    else 
+                    {
+                        FindObjectOfType<GameStartScript>().HidderStart(GameObject.FindGameObjectWithTag("Player"));
+                    }
                     break;
                 }
             default:

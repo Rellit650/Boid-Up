@@ -14,7 +14,7 @@ public class CameraFollow : MonoBehaviour
     void FollowPlayer() 
     {
         Vector3 newPos = Vector3.Lerp(gameObject.transform.position, target.transform.position, 0.0625f);
-        newPos.y = gameObject.transform.position.y;
+        //newPos.y = gameObject.transform.position.y;
         gameObject.transform.position = newPos;
     }
 }

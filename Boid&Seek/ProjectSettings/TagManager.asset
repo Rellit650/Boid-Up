@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - NetworkedPlayer
+  - Ground
   layers:
   - Default
   - TransparentFX
