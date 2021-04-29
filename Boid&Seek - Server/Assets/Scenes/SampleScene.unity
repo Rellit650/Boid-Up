@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f57ed31ccc604af4da7fb33e327c7b44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sizeOfGame: 2
+  sizeOfGame: 0
   flocks: []
   boid: {fileID: 5473490180797386385, guid: b359b1569d13d25428e7547feb4ed75d, type: 3}
   spawnRangeX: 0

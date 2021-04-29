@@ -5,4 +5,6 @@ public enum MessageIDs
     PLAYER_JOIN,
     PLAYER_SETID,
     GAME_START,
+    BOID_UPDATE,
+    BOID_SPAWN,
 }

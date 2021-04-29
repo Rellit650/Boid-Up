@@ -44,15 +44,15 @@ public class ServerScript : MonoBehaviour
         {
             case gameSize.Small:
                 {
-                    spawnRangeX = 9;
-                    spawnRangeZ = 9;
-                    numBoidsInFlocks = 100;
-                    neighborhoodSize = 10f;
-                    separateRadius = 2.4f;
-                    distanceFromCenter = 20f;
+                    spawnRangeX = 30;
+                    spawnRangeZ = 30;
+                    numBoidsInFlocks = 120;
+                    neighborhoodSize = 6f;
+                    separateRadius = 4.5f;
+                    distanceFromCenter = 200f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
-                    SeparateWeight = 1f;
+                    SeparateWeight = 1.1f;
                     ReturnToCenterWeight = 3f;
                     break;
                 }
