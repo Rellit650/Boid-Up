@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Unity.Networking.Transport;
 
 public class PlayerScript : MonoBehaviour
@@ -9,6 +10,8 @@ public class PlayerScript : MonoBehaviour
     public NetworkConnection m_Connection;
     public bool m_Done;
     public float m_DRDistance = 100.0f;
+
+    public Text chatMsgText;
 
     [SerializeField]
     private GameObject NetworkedPlayerPrefab;
@@ -126,6 +129,8 @@ public class PlayerScript : MonoBehaviour
             case MessageIDs.CHAT_MSG:
                 {
                     message = new NetMessage_Chat(stream);
+                    NetMessage_Chat castRef = (NetMessage_Chat)message;
+                    chatMsgText.text = castRef.chatMsg.ToString();
                     break;
                 }
 
