@@ -44,45 +44,45 @@ public class ServerScript : MonoBehaviour
         {
             case gameSize.Small:
                 {
-                    spawnRangeX = 30;
-                    spawnRangeZ = 30;
+                    spawnRangeX = 20;
+                    spawnRangeZ = 20;
                     numBoidsInFlocks = 120;
                     neighborhoodSize = 6f;
-                    separateRadius = 4.5f;
-                    distanceFromCenter = 200f;
+                    separateRadius = 2.8f;
+                    distanceFromCenter = 20f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
                     SeparateWeight = 1.1f;
-                    ReturnToCenterWeight = 3f;
+                    ReturnToCenterWeight = 10f;
                     break;
                 }
             case gameSize.Large:
                 {
-                    spawnRangeX = 13;
-                    spawnRangeZ = 13;
+                    spawnRangeX = 30;
+                    spawnRangeZ = 30;
                     numBoidsInFlocks = 200;
                     neighborhoodSize = 6f;
                     separateRadius = 2.8f;
-                    distanceFromCenter = 35f;
-                    AlignWeight = .9f;
-                    CohesionWeight = .9f;
-                    SeparateWeight = 1.2f;
-                    ReturnToCenterWeight = 3f;
+                    distanceFromCenter = 30f;
+                    AlignWeight = 1f;
+                    CohesionWeight = 1f;
+                    SeparateWeight = 1.1f;
+                    ReturnToCenterWeight = 10f;
                     break;
                 }
             case gameSize.Average:
             default:
                 {
-                    spawnRangeX = 11;
-                    spawnRangeZ = 11;
-                    numBoidsInFlocks = 150;
-                    neighborhoodSize = 8f;
-                    separateRadius = 2.6f;
-                    distanceFromCenter = 27.5f;
+                    spawnRangeX = 25;
+                    spawnRangeZ = 25;
+                    numBoidsInFlocks = 160;
+                    neighborhoodSize = 6f;
+                    separateRadius = 2.8f;
+                    distanceFromCenter = 25f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
                     SeparateWeight = 1.1f;
-                    ReturnToCenterWeight = 3f;
+                    ReturnToCenterWeight = 10f;
                     break;
                 }
         }
@@ -91,6 +91,31 @@ public class ServerScript : MonoBehaviour
         {
             GameObject thing = Instantiate(boid, new Vector3(Random.Range(-spawnRangeX, spawnRangeX), 0, Random.Range(-spawnRangeZ, spawnRangeZ)), Quaternion.identity);
             thing.transform.parent = this.gameObject.transform;
+            int tag = j % 2;
+            switch (tag)
+            {
+                case 1:
+                    {
+                        thing.tag = "Flock 1";
+                        break;
+                    }
+                case 2:
+                    {
+                        thing.tag = "Flock 2";
+                        break;
+                    }
+                case 3:
+                    {
+                        thing.tag = "Flock 3";
+                        break;
+                    }
+                default:
+                    {
+                        thing.tag = "Flock 4";
+                        break;
+                    }
+            }
+            
             FlockAI theThingThing = thing.GetComponent<FlockAI>();
             theThingThing.neighborhoodSize = neighborhoodSize;
             theThingThing.separateRadius = separateRadius;

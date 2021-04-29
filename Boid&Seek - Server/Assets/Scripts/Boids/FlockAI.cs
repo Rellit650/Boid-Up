@@ -26,7 +26,7 @@ public class FlockAI : MonoBehaviour
         Collider[] col = Physics.OverlapSphere(gameObject.transform.position, neighborhoodSize);
         foreach(Collider c in col)
         {
-            if (c.gameObject.name.Contains("Boid") && c.gameObject != this.gameObject)
+            if (c.gameObject.name.Contains("Boid") && c.gameObject != this.gameObject && c.CompareTag(tag) )
                 neighbors.Add(c.gameObject);
         }
     }
@@ -40,6 +40,12 @@ public class FlockAI : MonoBehaviour
             vel = (Align().normalized * AlignWeight) + (Cohesion().normalized * CohesionWeight) + (Separate().normalized * SeparateWeight) + (ReturnToCenter().normalized * ReturnToCenterWeight);
             vel.Normalize();
 
+            transform.forward = vel;
+            transform.position += vel * Time.deltaTime;
+        }
+        else
+        {
+            vel = ReturnToCenter().normalized;
             transform.forward = vel;
             transform.position += vel * Time.deltaTime;
         }
@@ -94,7 +100,7 @@ public class FlockAI : MonoBehaviour
         float t = retCent.magnitude / distanceFromCenter;
         if (t < 0.9f)
             return Vector3.zero;
-        
-        return new Vector3(retCent.x, 0, retCent.z)  * t  * t;
+
+        return new Vector3(retCent.x, 0, retCent.z);//  * t  * t;
     }
 }

@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Flock 1
+  - Flock 2
+  - Flock 3
+  - Flock 4
   layers:
   - Default
   - TransparentFX
