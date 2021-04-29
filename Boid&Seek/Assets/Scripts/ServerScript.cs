@@ -9,11 +9,9 @@ using UnityEngine.AI;
 
 public enum gameSize
 {
-    //VerySmall,
     Small,
     Average,
     Large,
-    VeryLarge
 }
 
 public class ServerScript : MonoBehaviour
@@ -41,30 +39,15 @@ public class ServerScript : MonoBehaviour
 
 
         switch (sizeOfGame)
-        {/*
-            case gameSize.VerySmall:
-                {
-                    spawnRangeX = 7;
-                    spawnRangeZ = 7;
-                    numBoidsInFlocks = 30;
-                    neighborhoodSize = 10f;
-                    separateRadius = 2.5f;
-                    distanceFromCenter = 10f;
-                    AlignWeight = 1f;
-                    CohesionWeight = 1f;
-                    SeparateWeight = 1f;
-                    ReturnToCenterWeight = 3f;
-                    break;
-
-                }
+        {
             case gameSize.Small:
                 {
-                    spawnRangeX = 8;
-                    spawnRangeZ = 8;
-                    numBoidsInFlocks = 50;
+                    spawnRangeX = 9;
+                    spawnRangeZ = 9;
+                    numBoidsInFlocks = 100;
                     neighborhoodSize = 10f;
-                    separateRadius = 2.5f;
-                    distanceFromCenter = 15f;
+                    separateRadius = 2.4f;
+                    distanceFromCenter = 20f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
                     SeparateWeight = 1f;
@@ -73,28 +56,14 @@ public class ServerScript : MonoBehaviour
                 }
             case gameSize.Large:
                 {
-                    spawnRangeX = 10;
-                    spawnRangeZ = 10;
-                    numBoidsInFlocks = 90;
-                    neighborhoodSize = 10f;
-                    separateRadius = 2.5f;
-                    distanceFromCenter = 15f;
-                    AlignWeight = 1f;
-                    CohesionWeight = 1f;
-                    SeparateWeight = 1.2f;
-                    ReturnToCenterWeight = 3f;
-                    break;
-                }*/
-            case gameSize.VeryLarge:
-                {
-                    spawnRangeX = 11;
-                    spawnRangeZ = 11;
-                    numBoidsInFlocks = 130;
-                    neighborhoodSize = 10f;
-                    separateRadius = 2.5f;
+                    spawnRangeX = 13;
+                    spawnRangeZ = 13;
+                    numBoidsInFlocks = 200;
+                    neighborhoodSize = 6f;
+                    separateRadius = 2.8f;
                     distanceFromCenter = 35f;
-                    AlignWeight = 1f;
-                    CohesionWeight = 1f;
+                    AlignWeight = .9f;
+                    CohesionWeight = .9f;
                     SeparateWeight = 1.2f;
                     ReturnToCenterWeight = 3f;
                     break;
@@ -102,12 +71,12 @@ public class ServerScript : MonoBehaviour
             case gameSize.Average:
             default:
                 {
-                    spawnRangeX = 9;
-                    spawnRangeZ = 9;
-                    numBoidsInFlocks = 70;
-                    neighborhoodSize = 10f;
-                    separateRadius = 2.5f;
-                    distanceFromCenter = 15f;
+                    spawnRangeX = 11;
+                    spawnRangeZ = 11;
+                    numBoidsInFlocks = 150;
+                    neighborhoodSize = 8f;
+                    separateRadius = 2.6f;
+                    distanceFromCenter = 27.5f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
                     SeparateWeight = 1.1f;
