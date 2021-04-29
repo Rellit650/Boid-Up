@@ -34,7 +34,7 @@ public class PlayerScript : MonoBehaviour
     IEnumerator DelayCommand() 
     {
         yield return new WaitForSeconds(0.7f);
-        NetworkingMessages message = new NetMessage_PlayerJoin(0, gameObject.transform.position.x,gameObject.transform.position.z);
+        NetworkingMessages message = new NetMessage_PlayerJoin(0, gameObject.transform.position.x, gameObject.transform.position.y ,gameObject.transform.position.z);
         SendMessage(message);
     }
 
@@ -133,14 +133,14 @@ public class PlayerScript : MonoBehaviour
                 {
                     message = new NetMessage_PlayerPos(stream);
                     NetMessage_PlayerPos castRef = (NetMessage_PlayerPos)message;
-                    UpdateNetworkedPlayer(castRef.playerIDNum, castRef.playerXPos, castRef.playerZPos, castRef.playerCompressionScale);
+                    UpdateNetworkedPlayer(castRef.playerIDNum, castRef.playerXPos, castRef.playerYPos, castRef.playerZPos, castRef.playerCompressionScale);
                     break;
                 }
             case MessageIDs.PLAYER_JOIN: 
                 {
                     message = new NetMessage_PlayerJoin(stream);
                     NetMessage_PlayerJoin castRef = (NetMessage_PlayerJoin)message;
-                    GameObject temp = Instantiate(NetworkedPlayerPrefab, new Vector3(castRef.playerXPos, 3.5f, castRef.playerZPos), Quaternion.identity);
+                    GameObject temp = Instantiate(NetworkedPlayerPrefab, new Vector3(castRef.playerXPos, castRef.playerYPos, castRef.playerZPos), Quaternion.identity);
                     //This is for handling other players so we set the id here for them
                     if (playerID == 0)
                     {
@@ -200,7 +200,7 @@ public class PlayerScript : MonoBehaviour
         m_Driver.EndSend(writer);
     }
 
-    void UpdateNetworkedPlayer(int nPlayerID, short xPos, short zPos, float compressionScale) 
+    void UpdateNetworkedPlayer(int nPlayerID, short xPos, short yPos , short zPos, float compressionScale) 
     {
         Debug.Log("update network player");
         for (int i = 0; i < NetworkedPlayerList.Length; i++) 
@@ -209,8 +209,9 @@ public class PlayerScript : MonoBehaviour
             {
                 if (NetworkedPlayerList[i].GetComponent<NetworkedPlayerScript>().playerID == nPlayerID) 
                 {
-                    Vector3 newPos = NetworkedPlayerList[i].transform.position;
+                    Vector3 newPos = Vector3.zero;
                     newPos.x = HubnerDC_Decompression(xPos, compressionScale);
+                    newPos.y = HubnerDC_Decompression(yPos, compressionScale);
                     newPos.z = HubnerDC_Decompression(zPos, compressionScale);
                     //NetworkedPlayerList[i].transform.position = newPos;
                     desiredPos = newPos;

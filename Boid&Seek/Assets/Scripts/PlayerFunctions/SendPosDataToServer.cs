@@ -20,7 +20,7 @@ public class SendPosDataToServer : MonoBehaviour
         {
             float divisor = HubnerDC_GetDivisor(transform.position);
             Vector3 compressedVec = HubnerDC_Compression(transform.position, divisor);
-            NetMessage_PlayerPos playerPos = new NetMessage_PlayerPos(client.getPlayerID(), compressedVec.x, compressedVec.z, divisor);
+            NetMessage_PlayerPos playerPos = new NetMessage_PlayerPos(client.getPlayerID(), compressedVec.x, compressedVec.y , compressedVec.z, divisor);
             client.SendMessage(playerPos);
             sendingTimer = Time.time;
         }

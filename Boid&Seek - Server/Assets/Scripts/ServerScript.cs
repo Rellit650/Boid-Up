@@ -260,7 +260,7 @@ public class ServerScript : MonoBehaviour
                         //Loop through all connections, send a "Player Joined message back to the new player so that all the current players spawn in
                         if (castRef.playerIDNum != i && playerGameObjectArray[i] != null)   //If the connection is not the sender and it has been created already
                         {
-                            NetMessage_PlayerJoin addPlayer = new NetMessage_PlayerJoin(i, playerGameObjectArray[i].transform.position.x, playerGameObjectArray[i].transform.position.z);
+                            NetMessage_PlayerJoin addPlayer = new NetMessage_PlayerJoin(i, playerGameObjectArray[i].transform.position.x, playerGameObjectArray[i].transform.position.y,playerGameObjectArray[i].transform.position.z);
                             SendMessage(sender, addPlayer);
                         }
                     }
@@ -291,12 +291,12 @@ public class ServerScript : MonoBehaviour
     {
         if (playerGameObjectArray[m.playerIDNum] != null)
         {
-            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), 3.5f, HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
+            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), HubnerDC_Decompression(m.playerYPos, m.playerCompressionScale), HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
         }
         else 
         {
             playerGameObjectArray[m.playerIDNum] = new GameObject();
-            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), 3.5f, HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
+            playerGameObjectArray[m.playerIDNum].transform.position = new Vector3(HubnerDC_Decompression(m.playerXPos, m.playerCompressionScale), HubnerDC_Decompression(m.playerYPos, m.playerCompressionScale), HubnerDC_Decompression(m.playerZPos, m.playerCompressionScale));
         }
     }
 

@@ -8,7 +8,8 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
     //rest of bits of size TBD for chat message string
     public int playerIDNum { get; set; }
     public short playerXPos { get; set; }
-    public short playerZPos { get; set; }  //Since Y is vertical, I'm ignoring it for now
+    public short playerYPos { get; set; }
+    public short playerZPos { get; set; }
     public float playerCompressionScale { get; set; }
 
 
@@ -23,12 +24,13 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
         Deserialize(reader);
     }
 
-    public NetMessage_PlayerPos(int playerID, float xPos, float zPos, float compression)
+    public NetMessage_PlayerPos(int playerID, float xPos, float yPos, float zPos, float compression)
     {
         msgID = MessageIDs.PLAYER_POS_UPDATE;
         playerIDNum = playerID;
         //this will cause data loss, that's the point
         playerXPos = (short)xPos;
+        playerYPos = (short)yPos;
         playerZPos = (short)zPos;
         playerCompressionScale = compression;
     }
@@ -40,6 +42,7 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
         writer.WriteInt(playerIDNum);
         //Compressing: CHANGE TO SHORTS SO NEGATIVES WORK
         writer.WriteShort(playerXPos); //Causing issues with negative numbers here?
+        writer.WriteShort(playerYPos);
         writer.WriteShort(playerZPos);
         writer.WriteFloat(playerCompressionScale);
     }
@@ -49,6 +52,7 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
         //First byte already read on server to handle IDs, so no worries
         playerIDNum = reader.ReadInt();
         playerXPos = reader.ReadShort();
+        playerYPos = reader.ReadShort();
         playerZPos = reader.ReadShort();
         playerCompressionScale = reader.ReadFloat();
     }

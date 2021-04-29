@@ -9,6 +9,7 @@ public class NetMessage_PlayerJoin : NetworkingMessages   //Inheriting from netw
     public int playerIDNum { get; set; }
     public float playerXPos { get; set; }
     public float playerZPos { get; set; }  //Since Y is vertical, I'm ignoring it for now
+    public float playerYPos { get; set; }  //Since Y is vertical, I'm ignoring it for now
 
 
     public NetMessage_PlayerJoin()
@@ -22,11 +23,12 @@ public class NetMessage_PlayerJoin : NetworkingMessages   //Inheriting from netw
         Deserialize(reader);
     }
 
-    public NetMessage_PlayerJoin(int playerID, float xPos, float zPos)
+    public NetMessage_PlayerJoin(int playerID, float xPos, float yPos, float zPos)
     {
         msgID = MessageIDs.PLAYER_JOIN;
         playerIDNum = playerID;
         playerXPos = xPos;
+        playerYPos = yPos;
         playerZPos = zPos;
     }
 
@@ -37,6 +39,7 @@ public class NetMessage_PlayerJoin : NetworkingMessages   //Inheriting from netw
         writer.WriteInt(playerIDNum);
         //Consider compressing?
         writer.WriteFloat(playerXPos);
+        writer.WriteFloat(playerYPos);
         writer.WriteFloat(playerZPos);
     }
 
@@ -45,6 +48,7 @@ public class NetMessage_PlayerJoin : NetworkingMessages   //Inheriting from netw
         //First byte already read on server to handle IDs, so no worries
         playerIDNum = reader.ReadInt();
         playerXPos = reader.ReadFloat();
+        playerYPos = reader.ReadFloat();
         playerZPos = reader.ReadFloat();
     }
 
