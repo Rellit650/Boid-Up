@@ -5,4 +5,5 @@ public enum MessageIDs
     PLAYER_JOIN,
     PLAYER_SETID,
     GAME_START,
+    CHANGE_ROLE
 }

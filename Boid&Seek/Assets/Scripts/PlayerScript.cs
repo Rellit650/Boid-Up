@@ -22,6 +22,8 @@ public class PlayerScript : MonoBehaviour
     private GameObject[] NetworkedPlayerList = new GameObject[2];
     private Vector3 desiredPos;
 
+    public Material SeekerMat, HiderMat;
+
     void Start()
     {
         m_Driver = NetworkDriver.Create();
@@ -178,11 +180,33 @@ public class PlayerScript : MonoBehaviour
 
                     if (castRef.playerRole == 0)
                     {
+                        //Seeker
                         FindObjectOfType<GameStartScript>().SeekerStart(GameObject.FindGameObjectWithTag("Player"));
+                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
+                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
                     }
                     else 
                     {
+                        //Hider
                         FindObjectOfType<GameStartScript>().HidderStart(GameObject.FindGameObjectWithTag("Player"));
+                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
+                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                    }
+                    break;
+                }
+            case MessageIDs.CHANGE_ROLE:
+                {
+                    message = new NetMessage_ChangeRole(stream);
+                    NetMessage_ChangeRole castRef = (NetMessage_ChangeRole)message;
+                    if(castRef.playerNewRole == 0)
+                    {
+                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
+                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
+                    }
+                    else
+                    {
+                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
+                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
                     }
                     break;
                 }

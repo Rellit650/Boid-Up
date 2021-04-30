@@ -25,11 +25,16 @@ public class ServerScript : MonoBehaviour
     private NativeList<NetworkConnection> m_Connections;
     //private int[] playerIDArray = new int[MAX_CONNECTIONS];
     private GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
+    float tagDistance = 3.0f;
+    bool[] playerRoleArray = new bool[MAX_CONNECTIONS];
+
+    float roleTimer = 0.0f;
+    float maxTimer = 5.0f;
 
     void Start()
     {
         m_Driver = NetworkDriver.Create();
-        var endpoint = NetworkEndPoint.AnyIpv4;
+        NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
         endpoint.Port = 9000;
         if (m_Driver.Bind(endpoint) != 0)
             Debug.Log("Failed to bind to port 9000");
@@ -115,7 +120,7 @@ public class ServerScript : MonoBehaviour
                         break;
                     }
             }
-            
+            //Come on dude
             FlockAI theThingThing = thing.GetComponent<FlockAI>();
             theThingThing.neighborhoodSize = neighborhoodSize;
             theThingThing.separateRadius = separateRadius;
@@ -152,6 +157,10 @@ public class ServerScript : MonoBehaviour
 
     void Update()
     {
+        if(roleTimer < maxTimer)
+        {
+            roleTimer += Time.deltaTime;
+        }
         gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
         m_Driver.ScheduleUpdate().Complete();
 
@@ -179,11 +188,15 @@ public class ServerScript : MonoBehaviour
                 {
                     NetworkingMessages message = new NetMessage_GameStart((NetMessage_GameStart.Role)i);
                     SendMessage(m_Connections[i], message);
-                }               
+                }
+                //Preliminary roles set (true = seeker)
+                playerRoleArray[0] = true;
+                playerRoleArray[1] = false;
             }
         }
         HandleMessages();
         HandleFlock();
+        CheckPlayerDistance();
     }
 
     void HandlePlayerJoin(NetworkConnection joiner)
@@ -348,5 +361,31 @@ public class ServerScript : MonoBehaviour
         decompressed = decompressed * compDivisor;
 
         return decompressed;
+    }
+
+    void CheckPlayerDistance()
+    {
+        if(Vector3.Distance(playerGameObjectArray[0].transform.position, playerGameObjectArray[1].transform.position) <= tagDistance && roleTimer >= maxTimer)
+        {
+            Debug.Log("Tag!");
+            for(int i = 0; i < MAX_CONNECTIONS; i++)
+            {
+                //If seeker (true), set to hider (false), and vice versa
+                playerRoleArray[i] = !playerRoleArray[i];
+                if(playerRoleArray[i])
+                {
+                    //Send change to seeker
+                    NetMessage_ChangeRole newRole = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Seeker);
+                    SendMessage(m_Connections[i], newRole);
+                }
+                else
+                {
+                    //Send change to hider
+                    NetMessage_ChangeRole newRole = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Hidder);
+                    SendMessage(m_Connections[i], newRole);
+                }
+            }
+            roleTimer = 0.0f;
+        }
     }
 }

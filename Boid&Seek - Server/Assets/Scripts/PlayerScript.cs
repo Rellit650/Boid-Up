@@ -14,7 +14,7 @@ public class PlayerScript : MonoBehaviour
         m_Driver = NetworkDriver.Create();
         m_Connection = default(NetworkConnection);
 
-        var endpoint = NetworkEndPoint.LoopbackIpv4;
+        NetworkEndPoint endpoint = NetworkEndPoint.LoopbackIpv4;
         endpoint.Port = 9000;
         m_Connection = m_Driver.Connect(endpoint);
     }
