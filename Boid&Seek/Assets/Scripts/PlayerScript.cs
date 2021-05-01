@@ -17,11 +17,13 @@ public class PlayerScript : MonoBehaviour
     private GameObject NetworkedPlayerPrefab;
 
     private int playerID;
+    public bool isSeeker;
 
     //private List<GameObject> NetworkedPlayerList =  new List<GameObject>();
     private GameObject[] NetworkedPlayerList = new GameObject[2];
     private Vector3 desiredPos;
 
+    GameObject player;
     public Material SeekerMat, HiderMat;
 
     public GameObject NetworkedBoidPrefab;
@@ -36,6 +38,8 @@ public class PlayerScript : MonoBehaviour
         var endpoint = NetworkEndPoint.LoopbackIpv4;
         endpoint.Port = 9000;
         m_Connection = m_Driver.Connect(endpoint);
+
+        player = GameObject.FindGameObjectWithTag("Player");
 
         StartCoroutine(DelayCommand());
     }
@@ -57,6 +61,9 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
+        
+        player.GetComponent<MeshRenderer>().material = isSeeker ? SeekerMat : HiderMat;
+
         m_Driver.ScheduleUpdate().Complete();
 
         if (!m_Connection.IsCreated)
@@ -206,7 +213,8 @@ public class PlayerScript : MonoBehaviour
                     {
                         //Seeker
                         FindObjectOfType<GameStartScript>().SeekerStart(GameObject.FindGameObjectWithTag("Player"));
-                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
+                        player.GetComponent<MeshRenderer>().material = SeekerMat;
+                        isSeeker = true;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
                         //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = HiderMat;
                         ChangeNetworkedPlayerMat(HiderMat);
@@ -215,7 +223,8 @@ public class PlayerScript : MonoBehaviour
                     {
                         //Hider
                         FindObjectOfType<GameStartScript>().HidderStart(GameObject.FindGameObjectWithTag("Player"));
-                        GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
+                        player.GetComponent<MeshRenderer>().material = HiderMat;
+                        isSeeker = false;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
                         //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = SeekerMat;
                         ChangeNetworkedPlayerMat(SeekerMat);
@@ -228,6 +237,7 @@ public class PlayerScript : MonoBehaviour
                     NetMessage_ChangeRole castRef = (NetMessage_ChangeRole)message;
                     if(castRef.playerNewRole == 0)
                     {
+                        isSeeker = true;
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
                         //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = HiderMat;
@@ -235,6 +245,7 @@ public class PlayerScript : MonoBehaviour
                     }
                     else
                     {
+                        isSeeker = false;
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
                         //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = SeekerMat;

@@ -15,7 +15,7 @@ public class AIScript : MonoBehaviour
     public float moveSpeed = 3f;
     public bool isSeeker = false;
     public Difficulty difficulty;
-    public GameObject destination;
+    public GameObject destination, theServer;
     public List<GameObject> allPlayers, allAI, inVision;
     GameObject theSeeker = null;
     NavMeshAgent agent;
@@ -28,19 +28,15 @@ public class AIScript : MonoBehaviour
     void Start()
     {
         agent = gameObject.GetComponent<NavMeshAgent>();
+        theServer = GameObject.Find("PlayerEvents");
+        theServer.GetComponent<ServerScript>().allAI.Add(this.gameObject);
 
         //set random rotation so AIs wander in different directions
         transform.forward = new Vector3(Random.Range(-180, 180), 0, Random.Range(-180, 180));
 
         //find all AI and Players in game
-        foreach (GameObject g in GameObject.FindObjectsOfType<GameObject>())
-        {
-            if (g.gameObject.name.Equals("Player"))
-                allPlayers.Add(g.gameObject);
-            else if (g.gameObject.name.Equals("AI") && g.gameObject != gameObject)
-                allAI.Add(g.gameObject);
-        }
-
+        updatePlayerCount();
+        updateSeeker();
         //Detect if a player is the seeker, or set random AI as seeker
         //Player script info not yet implemented
         /*
@@ -54,8 +50,8 @@ public class AIScript : MonoBehaviour
             int seeker = Random.Range(0, allAI.Count);
             allAI[seeker].GetComponent<AIScript>().isSeeker = true;
             theSeeker = allAI[seeker];
-        }
-        */
+        }*/
+        
 
         //Adjust AI difficulty
         
@@ -83,9 +79,29 @@ public class AIScript : MonoBehaviour
         }
     }
 
+    public void updatePlayerCount()
+    {
+        allPlayers.Clear();
+        allAI.Clear();
+        foreach (GameObject g in GameObject.FindObjectsOfType<GameObject>())
+        {
+            if (g.gameObject.name.Equals("New Game Object"))
+                allPlayers.Add(g.gameObject);
+            else if (g.gameObject.name.Equals("AI") && g.gameObject != gameObject)
+                allAI.Add(g.gameObject);
+        }
+    }
+
+    public void updateSeeker()
+    {
+        theSeeker = theServer.GetComponent<ServerScript>().allPlayerAndAI[theServer.GetComponent<ServerScript>().currentSeekerIndex];
+    }
+
     // Update is called once per frame
     void Update()
     {
+        updatePlayerCount();
+        updateSeeker();
         CheckVisionRadius();
         Move();
     }

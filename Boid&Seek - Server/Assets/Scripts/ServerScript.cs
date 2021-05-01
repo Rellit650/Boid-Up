@@ -19,19 +19,21 @@ public class ServerScript : MonoBehaviour
     public gameSize sizeOfGame;
     public List<GameObject> flocks;
     public GameObject boid;
-    public float spawnRangeX, spawnRangeZ, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
-    public int numBoidsInFlocks;
+    float spawnRangeX, spawnRangeZ, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
+    int numBoidsInFlocks;
 
     public NetworkDriver m_Driver;
     private NativeList<NetworkConnection> m_Connections;
     //private int[] playerIDArray = new int[MAX_CONNECTIONS];
-    private GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
+    public GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
+    public List<GameObject> allPlayerAndAI;
+    [HideInInspector]
+    public List<GameObject> allAI;
     float tagDistance = 3.0f;
-    bool[] playerRoleArray = new bool[MAX_CONNECTIONS];
+    public bool[] playerRoleArray = new bool[MAX_CONNECTIONS];
     float[] playerTimers = new float[MAX_CONNECTIONS];
     bool gameBegin = false;
-    uint currentSeekerIndex;
-
+    public int currentSeekerIndex;
     float leaderboardSendTimer = 0.0f;
     float maxLeaderboardTime = 0.5f;
 
@@ -39,7 +41,7 @@ public class ServerScript : MonoBehaviour
     float maxRoleTimer = 5.0f;
 
     float boidTimer = 0.0f;
-    float maxBoidTimer = 2.5f;
+    float maxBoidTimer = 1.0f;
 
     void Start()
     {
@@ -170,7 +172,19 @@ public class ServerScript : MonoBehaviour
 
     void Update()
     {
-        if(roleTimer < maxRoleTimer)
+        allPlayerAndAI.Clear();
+        for(int i = 0; i < MAX_CONNECTIONS; ++i)
+        {
+            if(playerGameObjectArray[i] != null)
+                allPlayerAndAI.Add(playerGameObjectArray[i]);
+        }
+        for (int i = 0; i < allAI.Count; ++i)
+        {
+            if(!allPlayerAndAI.Contains(allAI[i]))
+                allPlayerAndAI.Add(allAI[i]);
+        }
+
+        if (roleTimer < maxRoleTimer)
         {
             roleTimer += Time.deltaTime;
         }
@@ -235,9 +249,12 @@ public class ServerScript : MonoBehaviour
         if(leaderboardSendTimer >= maxLeaderboardTime)
         {
             //Send Leaderboard data
-            NetMessage_Leaderboard leaderboardUpdate = new NetMessage_Leaderboard(currentSeekerIndex, playerTimers[currentSeekerIndex]);
-            Broadcast(leaderboardUpdate);
-            leaderboardSendTimer = 0.0f;
+            if (currentSeekerIndex < MAX_CONNECTIONS)
+            {
+                NetMessage_Leaderboard leaderboardUpdate = new NetMessage_Leaderboard((uint)currentSeekerIndex, playerTimers[currentSeekerIndex]);
+                Broadcast(leaderboardUpdate);
+                leaderboardSendTimer = 0.0f;
+            }
         }
     }
 
@@ -485,6 +502,54 @@ public class ServerScript : MonoBehaviour
 
     void CheckPlayerDistance()
     {
+        for(int j = 0; j < allPlayerAndAI.Count; ++j)
+        {
+            if(j != currentSeekerIndex)
+            {
+                if(Vector3.Distance(allPlayerAndAI[j].transform.position, allPlayerAndAI[currentSeekerIndex].transform.position) <= tagDistance && roleTimer >= maxRoleTimer)
+                {
+                    
+                    Debug.Log(allPlayerAndAI[currentSeekerIndex].name + " tagged" + allPlayerAndAI[j].name);
+                    //handle role update for did tag
+                    if(allPlayerAndAI[currentSeekerIndex].name.Contains("New Game Object"))
+                    {
+                        //player was seeker
+
+                        playerRoleArray[currentSeekerIndex] = false;
+                        //Send change to new hider
+                        NetMessage_ChangeRole newRole = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Hidder);
+                        SendMessage(m_Connections[currentSeekerIndex], newRole);
+                    }
+                    else
+                    {
+                        //AI did tag
+                        allPlayerAndAI[currentSeekerIndex].GetComponent<AIScript>().isSeeker = false;
+                    }
+
+                    //handle role update for got tagged
+                    if (allPlayerAndAI[j].name.Contains("New Game Object"))
+                    {
+                        //player got tag
+
+                        //If seeker (true), set to hider (false), and vice versa
+                        playerRoleArray[j] = !playerRoleArray[j];
+                        
+                        //Send change to new seeker
+                        NetMessage_ChangeRole newRole2 = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Seeker);
+                        SendMessage(m_Connections[j], newRole2);
+                    }
+                    else
+                    {
+                        //AI got tag
+                        allPlayerAndAI[j].GetComponent<AIScript>().isSeeker = true;
+                    }
+                    currentSeekerIndex = j;
+
+                    roleTimer = 0.0f;
+                }
+            }
+        }
+        /*
         if(Vector3.Distance(playerGameObjectArray[0].transform.position, playerGameObjectArray[1].transform.position) <= tagDistance && roleTimer >= maxRoleTimer)
         {
             Debug.Log("Tag!");
@@ -507,6 +572,6 @@ public class ServerScript : MonoBehaviour
                 }
             }
             roleTimer = 0.0f;
-        }
+        }*/
     }
 }

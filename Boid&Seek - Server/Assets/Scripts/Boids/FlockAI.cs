@@ -35,7 +35,7 @@ public class FlockAI : MonoBehaviour
     {
         Vector3 vel;
 
-        if (neighbors.Count > 0)
+        if (neighbors.Count > 2)
         {
             vel = (Align().normalized * AlignWeight) + (Cohesion().normalized * CohesionWeight) + (Separate().normalized * SeparateWeight) + (ReturnToCenter().normalized * ReturnToCenterWeight);
             vel.Normalize();
