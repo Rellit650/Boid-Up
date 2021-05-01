@@ -11,17 +11,23 @@ public class ChatMsgText : MonoBehaviour
         {
             //Command
             Debug.Log("Send Command Here");
-            int data;
+            float data;
             string[] stringArray = chatInput.text.Split(' ');
             if(stringArray.Length > 1)
             {
                 Debug.Log("First: " + stringArray[0] + " Second: " + stringArray[1]);   //Splits string into parts based on spaces
                 //TODO: check if first part of string array matches a command
-                short messageCheck = CheckCommands(stringArray[0]);
-                Debug.Log(messageCheck);
-                if(int.TryParse(stringArray[1],out data))   //Parses number in second half of array into integer
+                uint messageCheck = CheckCommands(stringArray[0]);
+                if(messageCheck != 0)
                 {
-                    Debug.Log(data);
+                    if(float.TryParse(stringArray[1],out data))   //Parses number in second half of array into float
+                    {
+                        //Debug.Log(data);
+                        //Send admin command to server
+                        NetMessage_AdminCommand command = new NetMessage_AdminCommand(messageCheck, data);
+                        FindObjectOfType<PlayerScript>().SendMessage(command);
+                    }
+
                 }
             }
         }
@@ -32,16 +38,21 @@ public class ChatMsgText : MonoBehaviour
         }
     }
 
-    private short CheckCommands(string chatCommand)
+    private uint CheckCommands(string chatCommand)
     {
         switch (chatCommand)
         {
-            case "/Teehee":
-                Debug.Log("Command: Teehee");
+            case "/setSpeed":
                 return 1;
-            case "/Heehoo":
-                Debug.Log("Command: Heehoo");
+            case "/setJump":
                 return 2;
+                //Above is for the clients, below is for the server
+            case "/setBoidUpdate":
+                return 3;
+            case "/setTagDistance":
+                return 4;
+            case "/setTagTimer":
+                return 5;
             default:
                 break;
         }

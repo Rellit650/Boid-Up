@@ -9,7 +9,7 @@ public class PlayerScript : MonoBehaviour
     public NetworkDriver m_Driver;
     public NetworkConnection m_Connection;
     public bool m_Done;
-    public float m_DRDistance = 100.0f;
+    public float m_DRDistance = 25.0f;
 
     public Text chatMsgText, leaderboardP1Text, leaderboardP2Text;
 
@@ -79,7 +79,7 @@ public class PlayerScript : MonoBehaviour
         {
             if(Vector3.Distance(flock[i].transform.position, flockNetPositions[i]) < m_DRDistance)
             {
-                flock[i].transform.position = Vector3.Lerp(flock[i].transform.position, flockNetPositions[i], 1.0f);
+                flock[i].transform.position = Vector3.Lerp(flock[i].transform.position, flockNetPositions[i], 0.05f);
             }
             else
             {
@@ -208,7 +208,8 @@ public class PlayerScript : MonoBehaviour
                         FindObjectOfType<GameStartScript>().SeekerStart(GameObject.FindGameObjectWithTag("Player"));
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
-                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = HiderMat;
+                        //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = HiderMat;
+                        ChangeNetworkedPlayerMat(HiderMat);
                     }
                     else 
                     {
@@ -216,7 +217,8 @@ public class PlayerScript : MonoBehaviour
                         FindObjectOfType<GameStartScript>().HidderStart(GameObject.FindGameObjectWithTag("Player"));
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
-                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = SeekerMat;
+                        //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = SeekerMat;
+                        ChangeNetworkedPlayerMat(SeekerMat);
                     }
                     break;
                 }
@@ -228,13 +230,15 @@ public class PlayerScript : MonoBehaviour
                     {
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
-                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = HiderMat;
+                        //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = HiderMat;
+                        ChangeNetworkedPlayerMat(HiderMat);
                     }
                     else
                     {
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
                         //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
-                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = SeekerMat;
+                        //GameObject.FindGameObjectWithTag("NetworkedPlayer").GetComponent<MeshRenderer>().material = SeekerMat;
+                        ChangeNetworkedPlayerMat(SeekerMat);
                     }
                     break;
                 }
@@ -258,13 +262,14 @@ public class PlayerScript : MonoBehaviour
             case MessageIDs.BOID_UPDATE: 
                 {
                     message = new NetMessage_BoidUpdate(stream);
-
-                    NetMessage_BoidUpdate castRef = (NetMessage_BoidUpdate)message;
-                    Debug.LogWarning("Boid Update");
-                    for (int i = 0; i < castRef.readBoids.Length; i++) 
+                    if(flockNetPositions != null)
                     {
-                        //flock[i].transform.position = castRef.readBoids[i];
-                        flockNetPositions[i] = castRef.readBoids[i];
+                        NetMessage_BoidUpdate castRef = (NetMessage_BoidUpdate)message;
+                        for (int i = 0; i < castRef.readBoids.Length; i++) 
+                        {
+                             //flock[i].transform.position = castRef.readBoids[i];
+                            flockNetPositions[i] = castRef.readBoids[i];
+                        }
                     }
                     break;
                 }
@@ -283,6 +288,14 @@ public class PlayerScript : MonoBehaviour
                     }
                     break;
                 }
+            case MessageIDs.ADMIN_COMMAND:
+                {
+                    message = new NetMessage_AdminCommand(stream);
+                    NetMessage_AdminCommand castRef = (NetMessage_AdminCommand)message;
+
+                    HandleCommands(ref castRef);
+                    break;
+                }
             default:
                 {
                     Debug.Log("Recieved message has no ID");
@@ -293,6 +306,41 @@ public class PlayerScript : MonoBehaviour
         message.ReceivedOnClient();
     }
 
+    void ChangeNetworkedPlayerMat(Material newMat)
+    {
+        for (int i = 0; i < NetworkedPlayerList.Length; i++)
+        {
+            if (NetworkedPlayerList[i] != null)
+            {
+                //NetworkedPlayerList[i].GetComponent<MeshRenderer>().material = newMat;
+                //NetworkedPlayerList[i].GetComponent<MeshRenderer>().material.color = newMat.color;
+                NetworkedPlayerList[i].GetComponent<MeshRenderer>().material.SetColor("_Color", newMat.color);
+            }
+        }
+    }
+
+
+    void HandleCommands(ref NetMessage_AdminCommand command)    //Just figured it should be a reference so it wouldn't make a new net message
+    {
+        switch (command.adminCommandNumber)
+        {
+            case 1: //Set speed
+                {
+                    GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>().moveSpeed = command.commandVariable;
+                    break;
+                }
+            case 2: //Set jump force
+                {
+                    GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>().jumpForce = command.commandVariable;
+                    break;
+                }
+            default:
+                {
+                    Debug.Log("Player command with ID " + command.adminCommandNumber.ToString() + " received");
+                    break;
+                }
+        }
+    }
 
     public virtual void SendMessage(NetworkingMessages msg)
     {

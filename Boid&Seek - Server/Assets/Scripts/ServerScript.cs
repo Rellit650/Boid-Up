@@ -36,7 +36,7 @@ public class ServerScript : MonoBehaviour
     float maxLeaderboardTime = 0.5f;
 
     float roleTimer = 0.0f;
-    float maxTimer = 5.0f;
+    float maxRoleTimer = 5.0f;
 
     float boidTimer = 0.0f;
     float maxBoidTimer = 2.5f;
@@ -170,7 +170,7 @@ public class ServerScript : MonoBehaviour
 
     void Update()
     {
-        if(roleTimer < maxTimer)
+        if(roleTimer < maxRoleTimer)
         {
             roleTimer += Time.deltaTime;
         }
@@ -179,6 +179,7 @@ public class ServerScript : MonoBehaviour
             boidTimer += Time.deltaTime;
         }
         gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
+
         m_Driver.ScheduleUpdate().Complete();
 
         // CleanUpConnections
@@ -272,6 +273,7 @@ public class ServerScript : MonoBehaviour
                 else if (cmd == NetworkEvent.Type.Disconnect)
                 {
                     Debug.Log("Client disconnected from server");
+                    m_Connections[i].Disconnect(m_Driver);
                     m_Connections[i] = default(NetworkConnection);
                     Destroy(playerGameObjectArray[i]); 
                 }
@@ -332,6 +334,47 @@ public class ServerScript : MonoBehaviour
                     NetMessage_BoidSpawn addBoids = new NetMessage_BoidSpawn(boidPositions);
                     SendMessage(sender, addBoids);
 
+                    break;
+                }
+            case MessageIDs.ADMIN_COMMAND:
+                {
+                    //For now we will only allow the host player (aka player 1) to use admin commands
+                    if(sender == m_Connections[0])  //If the sender is the first player to join, broadcast command
+                    {
+                        message = new NetMessage_AdminCommand(stream);
+
+                        NetMessage_AdminCommand castRef = (NetMessage_AdminCommand)message;
+                        switch (castRef.adminCommandNumber)
+                        {
+                            case 1: //Broadcasts speed change to all clients
+                                {
+                                    Broadcast(message);
+                                    break;
+                                }
+                            case 2: //Broadcasts jump change to all clients
+                                {
+                                    Broadcast(message);
+                                    break;
+                                }
+                            case 3: //Changes boid update timer
+                                {
+                                    maxBoidTimer = castRef.commandVariable;
+                                    break;
+                                }
+                            case 4: //Changes distance needed to tag
+                                {
+                                    tagDistance = castRef.commandVariable;
+                                    break;
+                                }
+                            case 5: //Changes tag cooldown time
+                                {
+                                    maxRoleTimer = castRef.commandVariable;
+                                    break;
+                                }
+                            default:
+                                break;
+                        }
+                    }
                     break;
                 }
             default:
@@ -422,8 +465,7 @@ public class ServerScript : MonoBehaviour
         if (boidTimer >= maxBoidTimer) 
         {
             boidTimer = 0.0f;
-            Debug.LogWarning("Boid Update: " + boidTimer);
-            for (int i = 0; i < MAX_CONNECTIONS; i++) 
+            for (int i = 0; i < m_Connections.Length; i++) 
             {
                 if (m_Connections[i] != null)
                 {
@@ -443,7 +485,7 @@ public class ServerScript : MonoBehaviour
 
     void CheckPlayerDistance()
     {
-        if(Vector3.Distance(playerGameObjectArray[0].transform.position, playerGameObjectArray[1].transform.position) <= tagDistance && roleTimer >= maxTimer)
+        if(Vector3.Distance(playerGameObjectArray[0].transform.position, playerGameObjectArray[1].transform.position) <= tagDistance && roleTimer >= maxRoleTimer)
         {
             Debug.Log("Tag!");
             for(int i = 0; i < MAX_CONNECTIONS; i++)
