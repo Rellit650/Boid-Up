@@ -19,7 +19,8 @@ public class ServerScript : MonoBehaviour
     public gameSize sizeOfGame;
     public List<GameObject> flocks;
     public GameObject boid;
-    public float spawnRangeX, spawnRangeZ, numBoidsInFlocks, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
+    public float spawnRangeX, spawnRangeZ, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
+    public int numBoidsInFlocks;
 
     public NetworkDriver m_Driver;
     private NativeList<NetworkConnection> m_Connections;
@@ -30,6 +31,9 @@ public class ServerScript : MonoBehaviour
 
     float roleTimer = 0.0f;
     float maxTimer = 5.0f;
+
+    float boidTimer = 0.0f;
+    float maxBoidTimer = 2.5f;
 
     void Start()
     {
@@ -54,7 +58,7 @@ public class ServerScript : MonoBehaviour
                     numBoidsInFlocks = 120;
                     neighborhoodSize = 6f;
                     separateRadius = 2.8f;
-                    distanceFromCenter = 20f;
+                    distanceFromCenter = 40f;
                     AlignWeight = 1f;
                     CohesionWeight = 1f;
                     SeparateWeight = 1.1f;
@@ -94,42 +98,42 @@ public class ServerScript : MonoBehaviour
 
         for (int j = 0; j < numBoidsInFlocks; ++j)
         {
-            GameObject thing = Instantiate(boid, new Vector3(Random.Range(-spawnRangeX, spawnRangeX), 0, Random.Range(-spawnRangeZ, spawnRangeZ)), Quaternion.identity);
-            thing.transform.parent = this.gameObject.transform;
+            GameObject Boid = Instantiate(boid, new Vector3(Random.Range(-spawnRangeX, spawnRangeX), 0, Random.Range(-spawnRangeZ, spawnRangeZ)), Quaternion.identity);
+            Boid.transform.parent = this.gameObject.transform;
             int tag = j % 2;
             switch (tag)
             {
                 case 1:
                     {
-                        thing.tag = "Flock 1";
+                        Boid.tag = "Flock 1";
                         break;
                     }
                 case 2:
                     {
-                        thing.tag = "Flock 2";
+                        Boid.tag = "Flock 2";
                         break;
                     }
                 case 3:
                     {
-                        thing.tag = "Flock 3";
+                        Boid.tag = "Flock 3";
                         break;
                     }
                 default:
                     {
-                        thing.tag = "Flock 4";
+                        Boid.tag = "Flock 4";
                         break;
                     }
             }
             //Come on dude
-            FlockAI theThingThing = thing.GetComponent<FlockAI>();
-            theThingThing.neighborhoodSize = neighborhoodSize;
-            theThingThing.separateRadius = separateRadius;
-            theThingThing.distanceFromCenter = distanceFromCenter;
-            theThingThing.AlignWeight = AlignWeight;
-            theThingThing.CohesionWeight = CohesionWeight;
-            theThingThing.SeparateWeight = SeparateWeight;
-            theThingThing.ReturnToCenterWeight = ReturnToCenterWeight;
-            flocks.Add(thing);
+            FlockAI aiComponent = Boid.GetComponent<FlockAI>();
+            aiComponent.neighborhoodSize = neighborhoodSize;
+            aiComponent.separateRadius = separateRadius;
+            aiComponent.distanceFromCenter = distanceFromCenter;
+            aiComponent.AlignWeight = AlignWeight;
+            aiComponent.CohesionWeight = CohesionWeight;
+            aiComponent.SeparateWeight = SeparateWeight;
+            aiComponent.ReturnToCenterWeight = ReturnToCenterWeight;
+            flocks.Add(Boid);
         }
         StartCoroutine(RemoveStationaryGround());
     }
@@ -160,6 +164,10 @@ public class ServerScript : MonoBehaviour
         if(roleTimer < maxTimer)
         {
             roleTimer += Time.deltaTime;
+        }
+        if (boidTimer < maxBoidTimer)
+        {
+            boidTimer += Time.deltaTime;
         }
         gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
         m_Driver.ScheduleUpdate().Complete();
@@ -194,9 +202,10 @@ public class ServerScript : MonoBehaviour
                 playerRoleArray[1] = false;
             }
         }
+        SendBoidUpdate();
         HandleMessages();
         HandleFlock();
-        CheckPlayerDistance();
+        CheckPlayerDistance();      
     }
 
     void HandlePlayerJoin(NetworkConnection joiner)
@@ -268,7 +277,7 @@ public class ServerScript : MonoBehaviour
                     //SpawnAllOtherPlayers
 
                     NetMessage_PlayerJoin castRef = (NetMessage_PlayerJoin)message;
-
+                    //Handle spawning other players to correct position
                     for(int i = 0; i < playerGameObjectArray.Length; i++) //Is i going to be the player ID index? If so, this should work but it feels wrong
                     {
                         //Loop through all connections, send a "Player Joined message back to the new player so that all the current players spawn in
@@ -278,6 +287,19 @@ public class ServerScript : MonoBehaviour
                             SendMessage(sender, addPlayer);
                         }
                     }
+
+                    //Handle spawning of flock
+
+                    Vector3[] boidPositions = new Vector3[numBoidsInFlocks]; 
+
+                    for (int i = 0; i < numBoidsInFlocks; i++) 
+                    {
+                        boidPositions[i] = flocks[i].transform.position;
+                    }
+
+                    NetMessage_BoidSpawn addBoids = new NetMessage_BoidSpawn(boidPositions);
+                    SendMessage(sender, addBoids);
+
                     break;
                 }
             default:
@@ -361,6 +383,30 @@ public class ServerScript : MonoBehaviour
         decompressed = decompressed * compDivisor;
 
         return decompressed;
+    }
+
+    void SendBoidUpdate() 
+    {
+        if (boidTimer >= maxBoidTimer) 
+        {
+            boidTimer = 0.0f;
+            Debug.LogWarning("Boid Update: " + boidTimer);
+            for (int i = 0; i < MAX_CONNECTIONS; i++) 
+            {
+                if (m_Connections[i] != null)
+                {
+                    Vector3[] boidPositions = new Vector3[numBoidsInFlocks];
+
+                    for (int j = 0; j < numBoidsInFlocks; j++)
+                    {
+                        boidPositions[j] = flocks[j].transform.position;
+                    }
+                    NetMessage_BoidUpdate boidUpdate = new NetMessage_BoidUpdate(boidPositions);
+                    SendMessage(m_Connections[i], boidUpdate);
+                }
+            }
+           
+        }
     }
 
     void CheckPlayerDistance()

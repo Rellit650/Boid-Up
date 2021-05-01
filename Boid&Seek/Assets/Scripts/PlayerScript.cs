@@ -24,6 +24,9 @@ public class PlayerScript : MonoBehaviour
 
     public Material SeekerMat, HiderMat;
 
+    public GameObject NetworkedBoidPrefab;
+    private GameObject[] flock;
+
     void Start()
     {
         m_Driver = NetworkDriver.Create();
@@ -207,6 +210,34 @@ public class PlayerScript : MonoBehaviour
                     {
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
                         NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                    }
+                    break;
+                }
+            case MessageIDs.BOID_SPAWN: 
+                {
+                    message = new NetMessage_BoidSpawn(stream);
+
+                    NetMessage_BoidSpawn castRef = (NetMessage_BoidSpawn)message;
+
+                    flock = new GameObject[castRef.readBoids.Length];
+
+                    for (int i = 0; i < castRef.readBoids.Length; i++) 
+                    {
+                        flock[i] = Instantiate(NetworkedBoidPrefab,gameObject.transform);
+                        flock[i].transform.position = castRef.readBoids[i];
+                    }
+
+                    break;
+                }
+            case MessageIDs.BOID_UPDATE: 
+                {
+                    message = new NetMessage_BoidUpdate(stream);
+
+                    NetMessage_BoidUpdate castRef = (NetMessage_BoidUpdate)message;
+                    Debug.LogWarning("Boid Update");
+                    for (int i = 0; i < castRef.readBoids.Length; i++) 
+                    {
+                        flock[i].transform.position = castRef.readBoids[i];
                     }
                     break;
                 }
