@@ -28,6 +28,12 @@ public class ServerScript : MonoBehaviour
     private GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
     float tagDistance = 3.0f;
     bool[] playerRoleArray = new bool[MAX_CONNECTIONS];
+    float[] playerTimers = new float[MAX_CONNECTIONS];
+    bool gameBegin = false;
+    uint currentSeekerIndex;
+
+    float leaderboardSendTimer = 0.0f;
+    float maxLeaderboardTime = 0.5f;
 
     float roleTimer = 0.0f;
     float maxTimer = 5.0f;
@@ -135,6 +141,9 @@ public class ServerScript : MonoBehaviour
             aiComponent.ReturnToCenterWeight = ReturnToCenterWeight;
             flocks.Add(Boid);
         }
+        //Setting initial timer values. Not sure if needed, but just to be safe
+        playerTimers[0] = 0.0f;
+        playerTimers[1] = 0.0f;
         StartCoroutine(RemoveStationaryGround());
     }
     IEnumerator RemoveStationaryGround()
@@ -191,11 +200,11 @@ public class ServerScript : MonoBehaviour
 
             if (m_Connections.Length >= 2) 
             {
-                Debug.Log("Do we get here");
                 for (int i = 0; i < playerGameObjectArray.Length; i++) 
                 {
                     NetworkingMessages message = new NetMessage_GameStart((NetMessage_GameStart.Role)i);
                     SendMessage(m_Connections[i], message);
+                    gameBegin = true;
                 }
                 //Preliminary roles set (true = seeker)
                 playerRoleArray[0] = true;
@@ -205,7 +214,30 @@ public class ServerScript : MonoBehaviour
         SendBoidUpdate();
         HandleMessages();
         HandleFlock();
-        CheckPlayerDistance();      
+        if(gameBegin)
+        {
+            CheckPlayerDistance();
+            HandleLeaderboardData(Time.deltaTime);
+        }
+    }
+
+    void HandleLeaderboardData(float deltaTime)
+    {
+        leaderboardSendTimer += deltaTime;
+        for (int i = 0; i < playerRoleArray.Length; i++)
+        {
+            if(playerRoleArray[i])  //If the player in this slot is a seeker, increment timer
+            {
+                playerTimers[i] += deltaTime;
+            }
+        }
+        if(leaderboardSendTimer >= maxLeaderboardTime)
+        {
+            //Send Leaderboard data
+            NetMessage_Leaderboard leaderboardUpdate = new NetMessage_Leaderboard(currentSeekerIndex, playerTimers[currentSeekerIndex]);
+            Broadcast(leaderboardUpdate);
+            leaderboardSendTimer = 0.0f;
+        }
     }
 
     void HandlePlayerJoin(NetworkConnection joiner)
@@ -420,13 +452,14 @@ public class ServerScript : MonoBehaviour
                 playerRoleArray[i] = !playerRoleArray[i];
                 if(playerRoleArray[i])
                 {
-                    //Send change to seeker
+                    //Send change to new seeker
                     NetMessage_ChangeRole newRole = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Seeker);
                     SendMessage(m_Connections[i], newRole);
+                    currentSeekerIndex = (uint)i;
                 }
                 else
                 {
-                    //Send change to hider
+                    //Send change to new hider
                     NetMessage_ChangeRole newRole = new NetMessage_ChangeRole(NetMessage_ChangeRole.Role.Hidder);
                     SendMessage(m_Connections[i], newRole);
                 }

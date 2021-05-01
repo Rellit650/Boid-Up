@@ -5,7 +5,6 @@ using UnityEngine;
 public class NetMessage_BoidUpdate : NetworkingMessages   //Inheriting from networking messages
 {
     //first 8 bits for message IDs
-    //rest of bits of size TBD for chat message string
     public short numBoids { get; set; }
     public float[] xPos { get; set; }
     public float[] zPos { get; set; }

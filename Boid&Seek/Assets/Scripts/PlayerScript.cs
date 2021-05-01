@@ -11,7 +11,7 @@ public class PlayerScript : MonoBehaviour
     public bool m_Done;
     public float m_DRDistance = 100.0f;
 
-    public Text chatMsgText;
+    public Text chatMsgText, leaderboardP1Text, leaderboardP2Text;
 
     [SerializeField]
     private GameObject NetworkedPlayerPrefab;
@@ -26,6 +26,7 @@ public class PlayerScript : MonoBehaviour
 
     public GameObject NetworkedBoidPrefab;
     private GameObject[] flock;
+    private Vector3[] flockNetPositions;
 
     void Start()
     {
@@ -48,7 +49,10 @@ public class PlayerScript : MonoBehaviour
 
     public void OnDestroy()
     {
-        m_Driver.Dispose();
+        if(m_Driver.IsCreated)
+        {
+            m_Driver.Dispose();
+        }
     }
 
     void Update()
@@ -62,24 +66,41 @@ public class PlayerScript : MonoBehaviour
             return;
         }
         HandleMessages();
-        HandleDeadReckoning();      
+        HandlePlayerDeadReckoning();
+        if(flock != null)
+        {
+            HandleBoidsDeadReckoning();
+        }
     }
 
-    void HandleDeadReckoning() 
+    void HandleBoidsDeadReckoning()
     {
-        if (playerID == 0)  //Jank
+        for(int i = 0; i < flock.Length; i++)
+        {
+            if(Vector3.Distance(flock[i].transform.position, flockNetPositions[i]) < m_DRDistance)
+            {
+                flock[i].transform.position = Vector3.Lerp(flock[i].transform.position, flockNetPositions[i], 1.0f);
+            }
+            else
+            {
+                flock[i].transform.position = flockNetPositions[i];
+            }
+        }
+    }
+
+    void HandlePlayerDeadReckoning() 
+    {
+        if (playerID == 0)
         {
             if (NetworkedPlayerList[1] != null)
             {
                 if (Vector3.Distance(NetworkedPlayerList[1].transform.position, desiredPos) < m_DRDistance)
                 {
                     NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
-                    Debug.Log("Lerp");
                 }
                 else
                 {
                     NetworkedPlayerList[1].transform.position = desiredPos;
-                    Debug.Log("TP");
                 }    
             }
         }
@@ -186,14 +207,16 @@ public class PlayerScript : MonoBehaviour
                         //Seeker
                         FindObjectOfType<GameStartScript>().SeekerStart(GameObject.FindGameObjectWithTag("Player"));
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
-                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
+                        //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
+                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = HiderMat;
                     }
                     else 
                     {
                         //Hider
                         FindObjectOfType<GameStartScript>().HidderStart(GameObject.FindGameObjectWithTag("Player"));
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
-                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                        //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = SeekerMat;
                     }
                     break;
                 }
@@ -204,12 +227,14 @@ public class PlayerScript : MonoBehaviour
                     if(castRef.playerNewRole == 0)
                     {
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = SeekerMat;
-                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
+                        //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = HiderMat;
+                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = HiderMat;
                     }
                     else
                     {
                         GameObject.FindGameObjectWithTag("Player").GetComponent<MeshRenderer>().material = HiderMat;
-                        NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                        //NetworkedPlayerPrefab.GetComponent<MeshRenderer>().material = SeekerMat;
+                        FindObjectOfType<NetworkedPlayerScript>().GetComponent<MeshRenderer>().material = SeekerMat;
                     }
                     break;
                 }
@@ -220,6 +245,7 @@ public class PlayerScript : MonoBehaviour
                     NetMessage_BoidSpawn castRef = (NetMessage_BoidSpawn)message;
 
                     flock = new GameObject[castRef.readBoids.Length];
+                    flockNetPositions = new Vector3[castRef.readBoids.Length];
 
                     for (int i = 0; i < castRef.readBoids.Length; i++) 
                     {
@@ -237,7 +263,23 @@ public class PlayerScript : MonoBehaviour
                     Debug.LogWarning("Boid Update");
                     for (int i = 0; i < castRef.readBoids.Length; i++) 
                     {
-                        flock[i].transform.position = castRef.readBoids[i];
+                        //flock[i].transform.position = castRef.readBoids[i];
+                        flockNetPositions[i] = castRef.readBoids[i];
+                    }
+                    break;
+                }
+            case MessageIDs.LEADERBOARD_UPDATE:
+                {
+                    message = new NetMessage_Leaderboard(stream);
+                    NetMessage_Leaderboard castRef = (NetMessage_Leaderboard)message;
+                    //Set timer text for specific player
+                    if(castRef.playerNumber == 0)   //Player 1
+                    {
+                        leaderboardP1Text.text = "Player 1: " + castRef.playerTime.ToString();
+                    }
+                    else if(castRef.playerNumber == 1)   //Player 2
+                    {
+                        leaderboardP2Text.text = "Player 2: " + castRef.playerTime.ToString();
                     }
                     break;
                 }

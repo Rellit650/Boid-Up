@@ -8,4 +8,6 @@ public enum MessageIDs
     CHANGE_ROLE,
     BOID_UPDATE,
     BOID_SPAWN,
+    LEADERBOARD_UPDATE,
+    ADMIN_COMMAND,
 }
