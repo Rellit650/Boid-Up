@@ -77,10 +77,6 @@ public class NetMessage_AIUpdate : NetworkingMessages
         }
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
 
     public override void ReceivedOnClient()
     {

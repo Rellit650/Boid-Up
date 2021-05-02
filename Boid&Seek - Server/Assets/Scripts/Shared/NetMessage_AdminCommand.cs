@@ -41,11 +41,6 @@ public class NetMessage_AdminCommand : NetworkingMessages   //Inheriting from ne
         commandVariable = reader.ReadFloat();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved message: " + chatMsg);
-        //server.Broadcast(this); //Broadcasts message recieved to all
-    }
 
     public override void ReceivedOnClient()
     {

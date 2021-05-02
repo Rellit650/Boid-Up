@@ -322,6 +322,7 @@ public class ServerScript : MonoBehaviour
             case MessageIDs.CHAT_MSG:
                 {
                     message = new NetMessage_Chat(stream);
+                    Broadcast(message);
                     break;
                 }
 
@@ -420,7 +421,6 @@ public class ServerScript : MonoBehaviour
                     break;
                 }
         }
-        message.ReceivedOnServer(this);
     }
 
     /*

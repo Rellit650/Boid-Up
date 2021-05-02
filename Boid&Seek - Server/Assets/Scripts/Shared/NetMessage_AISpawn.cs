@@ -83,10 +83,6 @@ public class NetMessage_AISpawn : NetworkingMessages   //Inheriting from network
         }
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
 
     public override void ReceivedOnClient()
     {

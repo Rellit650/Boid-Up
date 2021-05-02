@@ -70,10 +70,6 @@ public class NetMessage_BoidUpdate : NetworkingMessages   //Inheriting from netw
         }
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
 
     public override void ReceivedOnClient()
     {

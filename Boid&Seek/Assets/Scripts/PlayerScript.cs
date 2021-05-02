@@ -38,10 +38,20 @@ public class PlayerScript : MonoBehaviour
         m_Driver = NetworkDriver.Create();
         m_Connection = default(NetworkConnection);
 
-        var endpoint = NetworkEndPoint.LoopbackIpv4;
+        NetworkEndPoint endpoint = NetworkEndPoint.LoopbackIpv4;
         endpoint.Port = 9000;
         m_Connection = m_Driver.Connect(endpoint);
+        /*
+        m_Driver = NetworkDriver.Create();
+        m_Connection = default(NetworkConnection);
 
+        NetworkEndPoint endpoint;
+
+        if (NetworkEndPoint.TryParse("65.183.134.40", 9000, out endpoint))
+        {
+            m_Connection = m_Driver.Connect(endpoint);
+        }
+        */
         player = GameObject.FindGameObjectWithTag("Player");
 
         ai = new List<GameObject>();

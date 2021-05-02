@@ -41,12 +41,6 @@ public class NetMessage_Leaderboard : NetworkingMessages   //Inheriting from net
         playerTime = reader.ReadFloat();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved message: " + chatMsg);
-        //server.Broadcast(this); //Broadcasts message recieved to all
-    }
-
     public override void ReceivedOnClient()
     {
         //Debug.Log("Client recieved message: " + chatMsg);
