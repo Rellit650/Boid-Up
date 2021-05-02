@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641258, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1265,7 +1265,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1694846795}
   - component: {fileID: 1694846794}
-  - component: {fileID: 1694846793}
   m_Layer: 0
   m_Name: PlayerEvents
   m_TagString: Untagged
@@ -1273,31 +1272,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1694846793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1694846792}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f57ed31ccc604af4da7fb33e327c7b44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sizeOfGame: 1
-  flocks: []
-  boid: {fileID: 5473490180797386385, guid: b359b1569d13d25428e7547feb4ed75d, type: 3}
-  spawnRangeX: 0
-  spawnRangeZ: 0
-  numBoidsInFlocks: 150
-  neighborhoodSize: 0
-  separateRadius: 0
-  distanceFromCenter: 0
-  AlignWeight: 0
-  CohesionWeight: 0
-  SeparateWeight: 0
-  ReturnToCenterWeight: 0
 --- !u!114 &1694846794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1316,6 +1290,7 @@ MonoBehaviour:
   leaderboardP1Text: {fileID: 1500544172}
   leaderboardP2Text: {fileID: 678194528}
   NetworkedPlayerPrefab: {fileID: 7102094013820773566, guid: 62d4e84b3fd1f724c86ab42356e490f5, type: 3}
+  isSeeker: 0
   SeekerMat: {fileID: 2100000, guid: 3409679ec1e21964ab89c81d5b07f5b4, type: 2}
   HiderMat: {fileID: 2100000, guid: eec4a60864b6cfb40b881e49be2631e4, type: 2}
   NetworkedBoidPrefab: {fileID: 586585817210547530, guid: 12ababc81811709488bfd75bedfcd549, type: 3}
