@@ -103,7 +103,7 @@ public class PlayerScript : MonoBehaviour
             {
                 if (Vector3.Distance(NetworkedPlayerList[1].transform.position, desiredPos) < m_DRDistance)
                 {
-                    NetworkedPlayerList[1].transform.position = Vector3.Lerp(startingPosition, desiredPos, 0.0625f);
+                    NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
                 }
                 else
                 {
@@ -117,7 +117,7 @@ public class PlayerScript : MonoBehaviour
             {
                 if (Vector3.Distance(NetworkedPlayerList[0].transform.position, desiredPos) < m_DRDistance)
                 {
-                    NetworkedPlayerList[0].transform.position = Vector3.Lerp(startingPosition, desiredPos, 0.0625f);
+                    NetworkedPlayerList[0].transform.position = Vector3.Lerp(NetworkedPlayerList[0].transform.position, desiredPos, 0.0625f);
                     Debug.Log("Lerp");
                 }
                 else
