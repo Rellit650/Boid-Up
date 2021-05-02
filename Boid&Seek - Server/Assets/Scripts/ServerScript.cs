@@ -18,7 +18,7 @@ public class ServerScript : MonoBehaviour
     public const int MAX_CONNECTIONS = 2;
     public gameSize sizeOfGame;
     public List<GameObject> flocks;
-    public GameObject boid, jumpGroundPrefab;
+    public GameObject boid, AIPrefab;
     float spawnRangeX, spawnRangeZ, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
     int numBoidsInFlocks;
 
@@ -401,6 +401,11 @@ public class ServerScript : MonoBehaviour
                             case 5: //Changes tag cooldown time
                                 {
                                     maxRoleTimer = castRef.commandVariable;
+                                    break;
+                                }
+                            case 6: //spawn 1 singular AI
+                                {
+                                    Instantiate(AIPrefab, new Vector3(0, 1, 0), Quaternion.identity);
                                     break;
                                 }
                             default:

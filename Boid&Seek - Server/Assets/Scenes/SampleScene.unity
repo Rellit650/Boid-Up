@@ -157,7 +157,7 @@ MonoBehaviour:
   sizeOfGame: 0
   flocks: []
   boid: {fileID: 5473490180797386385, guid: b359b1569d13d25428e7547feb4ed75d, type: 3}
-  jumpGroundPrefab: {fileID: 0}
+  AIPrefab: {fileID: 7377165549157861374, guid: 81aa809586016744f9db3899b40d6cf2, type: 3}
   playerGameObjectArray:
   - {fileID: 0}
   - {fileID: 0}
