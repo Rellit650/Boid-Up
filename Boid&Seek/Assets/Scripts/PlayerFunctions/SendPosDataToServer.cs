@@ -5,7 +5,7 @@ using UnityEngine;
 public class SendPosDataToServer : MonoBehaviour
 {
     private float sendingTimer;
-    public float updateTime = 0.25f;
+    public float updateTime = 0.06f;
     private PlayerScript client;
     // Start is called before the first frame update
     void Start()
