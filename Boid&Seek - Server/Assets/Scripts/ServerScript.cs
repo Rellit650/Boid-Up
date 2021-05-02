@@ -41,7 +41,7 @@ public class ServerScript : MonoBehaviour
     float maxRoleTimer = 5.0f;
 
     float boidTimer = 0.0f;
-    float maxBoidTimer = 1.0f;
+    float maxBoidTimer = 0.06f;
 
     void Start()
     {
@@ -61,8 +61,8 @@ public class ServerScript : MonoBehaviour
         {
             case gameSize.Small:
                 {
-                    spawnRangeX = 20;
-                    spawnRangeZ = 20;
+                    spawnRangeX = 17;
+                    spawnRangeZ = 17;
                     numBoidsInFlocks = 120;
                     neighborhoodSize = 6f;
                     separateRadius = 2.8f;
