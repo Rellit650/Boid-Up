@@ -10,4 +10,6 @@ public enum MessageIDs
     BOID_SPAWN,
     LEADERBOARD_UPDATE,
     ADMIN_COMMAND,
+    AI_SPAWN,
+    AI_UPDATE,
 }
