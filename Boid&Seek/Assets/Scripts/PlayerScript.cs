@@ -27,19 +27,35 @@ public class PlayerScript : MonoBehaviour
     public Material SeekerMat, HiderMat;
 
     public GameObject NetworkedBoidPrefab;
+    public GameObject AIPrefab;
     private GameObject[] flock;
+    private List<GameObject> ai;
     private Vector3[] flockNetPositions;
+    private List<Vector3> aiNetPositions;
 
     void Start()
     {
         m_Driver = NetworkDriver.Create();
         m_Connection = default(NetworkConnection);
 
-        var endpoint = NetworkEndPoint.LoopbackIpv4;
+        NetworkEndPoint endpoint = NetworkEndPoint.LoopbackIpv4;
         endpoint.Port = 9000;
         m_Connection = m_Driver.Connect(endpoint);
+        /*
+        m_Driver = NetworkDriver.Create();
+        m_Connection = default(NetworkConnection);
 
+        NetworkEndPoint endpoint;
+
+        if (NetworkEndPoint.TryParse("65.183.134.40", 9000, out endpoint))
+        {
+            m_Connection = m_Driver.Connect(endpoint);
+        }
+        */
         player = GameObject.FindGameObjectWithTag("Player");
+
+        ai = new List<GameObject>();
+        aiNetPositions = new List<Vector3>();
 
         StartCoroutine(DelayCommand());
     }
@@ -61,7 +77,7 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
-        
+
         player.GetComponent<MeshRenderer>().material = isSeeker ? SeekerMat : HiderMat;
 
         m_Driver.ScheduleUpdate().Complete();
@@ -74,13 +90,17 @@ public class PlayerScript : MonoBehaviour
         }
         HandleMessages();
         HandlePlayerLerpCorrection();
-        if(flock != null)
+        if (ai != null)
+        { 
+            HandleAILerpCorrection();
+        }
+        if (flock != null)
         {
-            HandleBoidsDeadReckoning();
+            HandleBoidsLerpCorrection();
         }
     }
 
-    void HandleBoidsDeadReckoning()
+    void HandleBoidsLerpCorrection()
     {
         for(int i = 0; i < flock.Length; i++)
         {
@@ -91,6 +111,21 @@ public class PlayerScript : MonoBehaviour
             else
             {
                 flock[i].transform.position = flockNetPositions[i];
+            }
+        }
+    }
+
+    void HandleAILerpCorrection()
+    {
+        for (int i = 0; i < ai.Count; i++)
+        {
+            if (Vector3.Distance(ai[i].transform.position, aiNetPositions[i]) < m_DRDistance)
+            {
+                ai[i].transform.position = Vector3.Lerp(ai[i].transform.position, aiNetPositions[i], 0.05f);
+            }
+            else
+            {
+                ai[i].transform.position = flockNetPositions[i];
             }
         }
     }
@@ -127,7 +162,6 @@ public class PlayerScript : MonoBehaviour
                 }
             }
         }
-        
     }
     void HandleMessages()
     {
@@ -305,6 +339,40 @@ public class PlayerScript : MonoBehaviour
                     NetMessage_AdminCommand castRef = (NetMessage_AdminCommand)message;
 
                     HandleCommands(ref castRef);
+                    break;
+                }
+            case MessageIDs.AI_SPAWN:
+                {
+                    message = new NetMessage_AISpawn(stream);
+
+                    NetMessage_AISpawn castRef = (NetMessage_AISpawn)message;
+
+                    //ai = new GameObject[castRef.readAI.Length];
+                    //aiNetPositions = new Vector3[castRef.readAI.Length];
+                    aiNetPositions.Add(Vector3.zero);
+
+                    ai.Add(Instantiate(AIPrefab, gameObject.transform));
+                    ai[ai.Count - 1].transform.position = castRef.readAI[ai.Count - 1];
+                    /*for (int i = 0; i < castRef.readAI.Length; i++)
+                    {
+                        ai.Add(Instantiate(AIPrefab, gameObject.transform));
+                        ai[i].transform.position = castRef.readAI[i];
+                    }*/
+
+                    break;
+                }
+            case MessageIDs.AI_UPDATE:
+                {
+                    message = new NetMessage_AIUpdate(stream);
+                    if (aiNetPositions != null)
+                    {
+                        NetMessage_AIUpdate castRef = (NetMessage_AIUpdate)message;
+                        for (int i = 0; i < castRef.readAI.Length; i++)
+                        {
+                            //flock[i].transform.position = castRef.readBoids[i];
+                            aiNetPositions[i] = castRef.readAI[i];
+                        }
+                    }
                     break;
                 }
             default:

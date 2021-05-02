@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7377165549157861374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.21980894, y: 0.5498934, z: -0.12013626}
+  m_LocalPosition: {x: -0.21980894, y: -2.6, z: -0.12013626}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7377165549409886130}
@@ -132,15 +132,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   isSeeker: 0
-  difficulty: 0
   destination: {fileID: 7377165550438399378}
   theServer: {fileID: 0}
+  inVision: []
   allPlayers: []
   allAI: []
-  inVision: []
   playerDist: 0
   luckValue: 0
-  visionRadius: 0
+  visionRadius: 15
 --- !u!136 &7377165549409886129
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -176,7 +175,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7377165549409886140}
   m_Enabled: 1
-  m_AgentTypeID: -1372625422
+  m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8

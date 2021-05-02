@@ -18,7 +18,7 @@ public class ServerScript : MonoBehaviour
     public const int MAX_CONNECTIONS = 2;
     public gameSize sizeOfGame;
     public List<GameObject> flocks;
-    public GameObject boid;
+    public GameObject boid, AIPrefab;
     float spawnRangeX, spawnRangeZ, neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
     int numBoidsInFlocks;
 
@@ -28,7 +28,7 @@ public class ServerScript : MonoBehaviour
     public GameObject[] playerGameObjectArray = new GameObject[MAX_CONNECTIONS];
     public List<GameObject> allPlayerAndAI;
     [HideInInspector]
-    public List<GameObject> allAI;
+    public List<GameObject> allAI, JumpableGroundList;
     float tagDistance = 3.0f;
     public bool[] playerRoleArray = new bool[MAX_CONNECTIONS];
     float[] playerTimers = new float[MAX_CONNECTIONS];
@@ -43,6 +43,8 @@ public class ServerScript : MonoBehaviour
     float boidTimer = 0.0f;
     float maxBoidTimer = 0.06f;
 
+    float aiTimer = 0.0f;
+    float maxAITimer = 0.06f;
     void Start()
     {
         m_Driver = NetworkDriver.Create();
@@ -147,13 +149,8 @@ public class ServerScript : MonoBehaviour
         //Setting initial timer values. Not sure if needed, but just to be safe
         playerTimers[0] = 0.0f;
         playerTimers[1] = 0.0f;
-        StartCoroutine(RemoveStationaryGround());
     }
-    IEnumerator RemoveStationaryGround()
-    {
-        yield return new WaitForSeconds(3f);
-        Destroy(transform.GetChild(0).gameObject);
-    }
+
 
     /*
     private void resetPlayerIDs()
@@ -193,7 +190,12 @@ public class ServerScript : MonoBehaviour
         {
             boidTimer += Time.deltaTime;
         }
-        gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
+        if(aiTimer < maxAITimer)
+        {
+            aiTimer += Time.deltaTime;
+        }
+        //gameObject.GetComponent<NavMeshSurface>().buildHeightMesh = true;
+        //gameObject.GetComponent<NavMeshSurface>().BuildNavMesh();
 
         m_Driver.ScheduleUpdate().Complete();
 
@@ -228,6 +230,7 @@ public class ServerScript : MonoBehaviour
             }
         }
         SendBoidUpdate();
+        SendAIUpdate();
         HandleMessages();
         HandleFlock();
         if(gameBegin)
@@ -269,6 +272,17 @@ public class ServerScript : MonoBehaviour
                 playerGameObjectArray[i] = new GameObject();
                 NetworkingMessages message = new NetMessage_PlayerIDSet(i);
                 SendMessage(joiner, message);
+                if (allAI.Count > 0)
+                {
+                    Vector3[] pos = new Vector3[allAI.Count];
+                    for (int j = 0; j < allAI.Count; j++)
+                    {
+                        pos[j] = allAI[j].transform.position;
+                    }
+
+                    NetMessage_AISpawn spawnTheAI = new NetMessage_AISpawn(pos);
+                    SendMessage(joiner, spawnTheAI);
+                }
                 return;
             }
         }
@@ -308,6 +322,7 @@ public class ServerScript : MonoBehaviour
             case MessageIDs.CHAT_MSG:
                 {
                     message = new NetMessage_Chat(stream);
+                    Broadcast(message);
                     break;
                 }
 
@@ -389,6 +404,11 @@ public class ServerScript : MonoBehaviour
                                     maxRoleTimer = castRef.commandVariable;
                                     break;
                                 }
+                            case 6: //spawn 1 singular AI
+                                {
+                                    Instantiate(AIPrefab, new Vector3(0, 1, 0), Quaternion.identity);
+                                    break;
+                                }
                             default:
                                 break;
                         }
@@ -401,7 +421,6 @@ public class ServerScript : MonoBehaviour
                     break;
                 }
         }
-        message.ReceivedOnServer(this);
     }
 
     /*
@@ -498,6 +517,39 @@ public class ServerScript : MonoBehaviour
                 }
             }
            
+        }
+    }
+
+    public void spawnAI(GameObject theAI)
+    {
+        allAI.Add(theAI);
+
+        Vector3[] pos = new Vector3[allAI.Count];
+        for (int i = 0; i < allAI.Count; i++)
+        {
+            pos[i] = allAI[i].transform.position;
+        }
+
+        NetMessage_AISpawn spawnTheAI = new NetMessage_AISpawn(pos);
+        Broadcast(spawnTheAI);
+    }
+
+    void SendAIUpdate()
+    {
+        if(aiTimer >= maxAITimer)
+        {
+            aiTimer = 0.0f;
+            
+            Vector3[] aiPosition = new Vector3[allAI.Count];
+
+            for(int j = 0; j < allAI.Count; j++)
+            {
+                aiPosition[j] = allAI[j].transform.position;
+            }
+            NetMessage_AIUpdate aIUpdate = new NetMessage_AIUpdate(aiPosition);
+            Broadcast(aIUpdate);
+                
+            
         }
     }
 

@@ -53,6 +53,8 @@ public class ChatMsgText : MonoBehaviour
                 return 4;
             case "/setTagTimer":
                 return 5;
+            case "/spawnAI":
+                return 6;
             default:
                 break;
         }

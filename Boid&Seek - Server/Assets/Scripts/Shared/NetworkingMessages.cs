@@ -19,8 +19,4 @@ public class NetworkingMessages
     {
 
     }
-    public virtual void ReceivedOnServer(ServerScript server)
-    {
-
-    }
 }

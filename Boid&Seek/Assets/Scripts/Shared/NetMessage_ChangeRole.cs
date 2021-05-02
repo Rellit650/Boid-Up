@@ -39,11 +39,6 @@ public class NetMessage_ChangeRole : NetworkingMessages
         playerNewRole = (Role)reader.ReadByte();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
-
     public override void ReceivedOnClient()
     {
 

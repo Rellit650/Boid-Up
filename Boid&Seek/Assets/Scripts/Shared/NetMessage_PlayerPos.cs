@@ -57,11 +57,6 @@ public class NetMessage_PlayerPos : NetworkingMessages   //Inheriting from netwo
         playerCompressionScale = reader.ReadFloat();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
-
     public override void ReceivedOnClient()
     {
         //Debug.Log("Client recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);

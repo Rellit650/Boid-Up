@@ -52,11 +52,6 @@ public class NetMessage_PlayerJoin : NetworkingMessages   //Inheriting from netw
         playerZPos = reader.ReadFloat();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
-
     public override void ReceivedOnClient()
     {
         //Debug.Log("Client recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);

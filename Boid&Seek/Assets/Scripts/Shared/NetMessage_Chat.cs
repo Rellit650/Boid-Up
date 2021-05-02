@@ -39,12 +39,6 @@ public class NetMessage_Chat : NetworkingMessages   //Inheriting from networking
         chatMsg = reader.ReadFixedString128();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        Debug.Log("Server recieved message: " + chatMsg);
-        server.Broadcast(this); //Broadcasts message recieved to all
-    }
-
     public override void ReceivedOnClient()
     {
         Debug.Log("Client recieved message: " + chatMsg);

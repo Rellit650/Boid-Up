@@ -38,10 +38,6 @@ public class NetMessage_PlayerIDSet : NetworkingMessages   //Inheriting from net
         playerIDNum = reader.ReadInt();
     }
 
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
-    }
 
     public override void ReceivedOnClient()
     {

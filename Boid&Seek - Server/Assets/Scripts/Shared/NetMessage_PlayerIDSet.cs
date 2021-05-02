@@ -35,12 +35,9 @@ public class NetMessage_PlayerIDSet : NetworkingMessages   //Inheriting from net
     public override void Deserialize(DataStreamReader reader)   //Read all data from data stream to clear
     {
         //First byte already read on server to handle IDs, so no worries
-        playerIDNum = reader.ReadInt();    }
-
-    public override void ReceivedOnServer(ServerScript server)
-    {
-        //Debug.Log("Server recieved player pos: " + playerXPos + " " + playerZPos + "ID: " + playerIDNum);
+        playerIDNum = reader.ReadInt();   
     }
+
 
     public override void ReceivedOnClient()
     {

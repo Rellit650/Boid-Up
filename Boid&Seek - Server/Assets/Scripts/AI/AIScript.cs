@@ -3,25 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum Difficulty
-{
-    easy,
-    medium,
-    hard
-};
 
 public class AIScript : MonoBehaviour
 {
-    public float moveSpeed = 3f;
+    public float moveSpeed = 5f;
     public bool isSeeker = false;
-    public Difficulty difficulty;
+    [HideInInspector]
     public GameObject destination, theServer;
-    public List<GameObject> allPlayers, allAI, inVision;
+    public List<GameObject> inVision;
+    [HideInInspector]
+    public List<GameObject> allPlayers, allAI;
     GameObject theSeeker = null;
     NavMeshAgent agent;
     public float playerDist;
 
-    public float luckValue, visionRadius = 3;
+    public float luckValue, visionRadius = 15;
     float WanderWeight = 1, AIweight = 2;
     Vector2 wanderPointXZ;
     // Start is called before the first frame update
@@ -29,7 +25,8 @@ public class AIScript : MonoBehaviour
     {
         agent = gameObject.GetComponent<NavMeshAgent>();
         theServer = GameObject.Find("PlayerEvents");
-        theServer.GetComponent<ServerScript>().allAI.Add(this.gameObject);
+        //theServer.GetComponent<ServerScript>().allAI.Add(this.gameObject);
+        theServer.GetComponent<ServerScript>().spawnAI(this.gameObject);
 
         //set random rotation so AIs wander in different directions
         transform.forward = new Vector3(Random.Range(-180, 180), 0, Random.Range(-180, 180));
@@ -37,46 +34,7 @@ public class AIScript : MonoBehaviour
         //find all AI and Players in game
         updatePlayerCount();
         updateSeeker();
-        //Detect if a player is the seeker, or set random AI as seeker
-        //Player script info not yet implemented
-        /*
-        foreach (GameObject p in allPlayers)
-        {
-            if (p.gameObject.GetComponent<PlayerScript>().isSeeker)
-                theSeeker = p.gameObject;
-        }
-        if(theSeeker == null)
-        {
-            int seeker = Random.Range(0, allAI.Count);
-            allAI[seeker].GetComponent<AIScript>().isSeeker = true;
-            theSeeker = allAI[seeker];
-        }*/
         
-
-        //Adjust AI difficulty
-        
-        switch (difficulty)
-        {
-            case Difficulty.easy:
-                {
-                    luckValue = 5;
-                    visionRadius = 5;
-                    break;
-                }
-            case Difficulty.hard:
-                {
-                    luckValue = 15;
-                    visionRadius = 10;
-                    break;
-                }
-            case Difficulty.medium:
-            default:
-                {
-                    luckValue = 10;
-                    visionRadius = 7.5f;
-                    break;
-                }
-        }
     }
 
     public void updatePlayerCount()
@@ -127,12 +85,12 @@ public class AIScript : MonoBehaviour
         if(inVision.Count <= 0)
         {
             WanderWeight = 2;
-            AIweight = 0;
+            AIweight = 1;
         }
         else if (inVision.Count >= 1)
         {
             WanderWeight = 1;
-            AIweight = 2;
+            AIweight = inVision.Count + 1;
         }
     }
 
@@ -142,11 +100,12 @@ public class AIScript : MonoBehaviour
         if (isSeeker)
             AImove = Pursuit().normalized;
         else
-            AImove = Flee().normalized;
+        {
+            AImove = Flee().normalized * -1;
+        }
 
         vel = (Wander().normalized * WanderWeight) + (AImove * AIweight);
         vel.Normalize();
-        vel.y = 1.5f;
         destination.transform.position = transform.position + vel;
         agent.SetDestination(destination.transform.position);
         /*
@@ -158,7 +117,8 @@ public class AIScript : MonoBehaviour
     Vector3 Wander()
     {
         Vector3 wander = Vector3.zero;
-        wander = transform.position + transform.forward + new Vector3(Random.Range(-7, 7), 0, Random.Range(-7, 7));
+        wander = transform.position + transform.forward + new Vector3(Random.insideUnitCircle.x, 0, Random.insideUnitCircle.y);
+        //wander = transform.position + transform.forward + new Vector3(Random.Range(-7, 7), 0, Random.Range(-7, 7));
         wander -= transform.position;
         return new Vector3(wander.x, 0, wander.z);
     }
@@ -196,11 +156,11 @@ public class AIScript : MonoBehaviour
 
         foreach (GameObject p in inVision)
         {
-            flee -= p.transform.position;
+            flee += p.transform.position;
             ++fleeCount;
             if (theSeeker == p.gameObject)
             {
-                flee -= p.transform.position;
+                flee += p.transform.position;
                 ++fleeCount;
             }
         }
