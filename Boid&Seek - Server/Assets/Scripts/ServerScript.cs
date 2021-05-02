@@ -141,6 +141,7 @@ public class ServerScript : MonoBehaviour
             aiComponent.CohesionWeight = CohesionWeight;
             aiComponent.SeparateWeight = SeparateWeight;
             aiComponent.ReturnToCenterWeight = ReturnToCenterWeight;
+            aiComponent.speedMultipier = 2.0f;
             flocks.Add(Boid);
         }
         //Setting initial timer values. Not sure if needed, but just to be safe
