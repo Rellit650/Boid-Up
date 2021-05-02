@@ -10,14 +10,13 @@ Instructions:
 3. Start server first then start regular project and run a build for player 2
 
 
-
-
 Connecting Options:
 
 The clients by default are looking on your local machine for a server 
 if you want to change this for testing you must go into the playerscript in the client project
 and see commented lines 44-54 These show how to connect to a specific IP address and port 
 (side note make sure the host the server is running has the 9000 port been port forwarded or else you wont be able to connect)
+
 
 Game Logic:
 
@@ -26,6 +25,7 @@ and assign each player a role, either  Hidder or Seeker, Seekers will know they 
 as they will be marked as red and Hidder will be marked as white 
 (Other player's materials dont update only yours so you will know only if you are the Seeker or not, not who actually is)
 The game will keep track of how long each player is the Seeker for with the leaderboard in the top right
+
 
 Chat Messages and Commands:
 
@@ -38,6 +38,7 @@ Command list: _ = space
 "/setTagDistance"_(number for how far tag distance is)
 "/setTagTimer"_(number for how often tag can be swapped)
 "/spawnAI"_(any number)(This command will only spawn 1 AI no matter what number you put but you must put a number for this commmand to work)
+
 
 AI & Boids:
 
