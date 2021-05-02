@@ -21,7 +21,7 @@ public class PlayerScript : MonoBehaviour
 
     //private List<GameObject> NetworkedPlayerList =  new List<GameObject>();
     private GameObject[] NetworkedPlayerList = new GameObject[2];
-    private Vector3 desiredPos;
+    private Vector3 desiredPos, startingPosition;
 
     GameObject player;
     public Material SeekerMat, HiderMat;
@@ -73,7 +73,7 @@ public class PlayerScript : MonoBehaviour
             return;
         }
         HandleMessages();
-        HandlePlayerDeadReckoning();
+        HandlePlayerLerpCorrection();
         if(flock != null)
         {
             HandleBoidsDeadReckoning();
@@ -95,7 +95,7 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    void HandlePlayerDeadReckoning() 
+    void HandlePlayerLerpCorrection() 
     {
         if (playerID == 0)
         {
@@ -103,7 +103,7 @@ public class PlayerScript : MonoBehaviour
             {
                 if (Vector3.Distance(NetworkedPlayerList[1].transform.position, desiredPos) < m_DRDistance)
                 {
-                    NetworkedPlayerList[1].transform.position = Vector3.Lerp(NetworkedPlayerList[1].transform.position, desiredPos, 0.0625f);
+                    NetworkedPlayerList[1].transform.position = Vector3.Lerp(startingPosition, desiredPos, 0.0625f);
                 }
                 else
                 {
@@ -117,7 +117,7 @@ public class PlayerScript : MonoBehaviour
             {
                 if (Vector3.Distance(NetworkedPlayerList[0].transform.position, desiredPos) < m_DRDistance)
                 {
-                    NetworkedPlayerList[0].transform.position = Vector3.Lerp(NetworkedPlayerList[0].transform.position, desiredPos, 0.0625f);
+                    NetworkedPlayerList[0].transform.position = Vector3.Lerp(startingPosition, desiredPos, 0.0625f);
                     Debug.Log("Lerp");
                 }
                 else
@@ -376,6 +376,7 @@ public class PlayerScript : MonoBehaviour
                     newPos.z = HubnerDC_Decompression(zPos, compressionScale);
                     //NetworkedPlayerList[i].transform.position = newPos;
                     desiredPos = newPos;
+                    startingPosition = NetworkedPlayerList[i].transform.position;
                     return;
                 }
             }
