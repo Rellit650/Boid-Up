@@ -131,9 +131,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 3
-  isSeeker: 1
+  isSeeker: 0
   difficulty: 0
   destination: {fileID: 7377165550438399378}
+  theServer: {fileID: 0}
   allPlayers: []
   allAI: []
   inVision: []

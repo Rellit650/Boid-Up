@@ -1,11 +1,11 @@
 using Unity.Collections;
 using Unity.Networking.Transport;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class NetMessage_BoidUpdate : NetworkingMessages   //Inheriting from networking messages
 {
     //first 8 bits for message IDs
-    //rest of bits of size TBD for chat message string
     public short numBoids { get; set; }
     public float[] xPos { get; set; }
     public float[] zPos { get; set; }
@@ -45,8 +45,13 @@ public class NetMessage_BoidUpdate : NetworkingMessages   //Inheriting from netw
         //Compressing: CHANGE TO SHORTS SO NEGATIVES WORK
         for (int i = 0; i < numBoids; i++)
         {
-            writer.WriteFloat(xPos[i]);
-            writer.WriteFloat(zPos[i]);
+            half compressX = (half)xPos[i];
+            half compressZ = (half)zPos[i];
+
+            writer.WriteUShort(compressX.value);
+            writer.WriteUShort(compressZ.value);
+            //writer.WriteFloat(xPos[i]);
+            //writer.WriteFloat(zPos[i]);
         }
     }
 
@@ -54,12 +59,14 @@ public class NetMessage_BoidUpdate : NetworkingMessages   //Inheriting from netw
     {
         //First byte already read on server to handle IDs, so no worries
         numBoids = reader.ReadShort();
-
+        half decompressX, decompressZ;
         readBoids = new Vector3[numBoids];
         for (int i = 0; i < numBoids; i++)
         {
-            readBoids[i].x = reader.ReadFloat();
-            readBoids[i].z = reader.ReadFloat();
+            decompressX.value = reader.ReadUShort();
+            decompressZ.value = reader.ReadUShort();
+            readBoids[i].x = decompressX;
+            readBoids[i].z = decompressZ;
         }
     }
 

@@ -6,7 +6,7 @@ using UnityEngine;
 public class FlockAI : MonoBehaviour
 {
     //[HideInInspector]
-    public float neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight;
+    public float neighborhoodSize, separateRadius, distanceFromCenter, AlignWeight, CohesionWeight, SeparateWeight, ReturnToCenterWeight, speedMultipier;
     float sqrSepRadius;
     Vector2 center;
     public List<GameObject> neighbors;
@@ -35,19 +35,19 @@ public class FlockAI : MonoBehaviour
     {
         Vector3 vel;
 
-        if (neighbors.Count > 0)
+        if (neighbors.Count > 2)
         {
             vel = (Align().normalized * AlignWeight) + (Cohesion().normalized * CohesionWeight) + (Separate().normalized * SeparateWeight) + (ReturnToCenter().normalized * ReturnToCenterWeight);
             vel.Normalize();
 
             transform.forward = vel;
-            transform.position += vel * Time.deltaTime;
+            transform.position += vel * Time.deltaTime * speedMultipier;
         }
         else
         {
             vel = ReturnToCenter().normalized;
             transform.forward = vel;
-            transform.position += vel * Time.deltaTime;
+            transform.position += vel * Time.deltaTime * speedMultipier;
         }
     }
 
