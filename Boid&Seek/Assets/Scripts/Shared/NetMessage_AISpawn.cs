@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Networking.Transport;
 using UnityEngine;
@@ -38,8 +39,21 @@ public class NetMessage_AISpawn : NetworkingMessages   //Inheriting from network
             zPos[i] = boids[i].z;
         }
     }
-
-
+    public NetMessage_AISpawn(List<Vector3> ai)
+    {
+        msgID = MessageIDs.AI_SPAWN;
+        numAI = (short)ai.Count;
+        xPos = new float[numAI];
+        yPos = new float[numAI];
+        zPos = new float[numAI];
+        //this will cause data loss, that's the point
+        for (int i = 0; i < numAI; i++)
+        {
+            xPos[i] = ai[i].x;
+            yPos[i] = ai[i].y;
+            zPos[i] = ai[i].z;
+        }
+    }
     public override void Serialize(ref DataStreamWriter writer)
     {
         writer.WriteByte((byte)msgID);  //Most space-efficient way of handling messages, could also do write int
