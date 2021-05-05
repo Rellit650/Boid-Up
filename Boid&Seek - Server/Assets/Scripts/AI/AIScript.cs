@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class AIScript : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 9f, bonusMoveSpeed = 3f;
     public bool isSeeker = false;
     [HideInInspector]
     public GameObject destination, theServer;
@@ -15,11 +15,10 @@ public class AIScript : MonoBehaviour
     public List<GameObject> allPlayers, allAI;
     GameObject theSeeker = null;
     NavMeshAgent agent;
-    public float playerDist;
-
-    public float luckValue, visionRadius = 15;
+    Vector3 wander;
+    float luckValue, visionRadius = 200;
     float WanderWeight = 1, AIweight = 2;
-    Vector2 wanderPointXZ;
+    public GameObject obj;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +27,7 @@ public class AIScript : MonoBehaviour
         //theServer.GetComponent<ServerScript>().allAI.Add(this.gameObject);
         theServer.GetComponent<ServerScript>().spawnAI(this.gameObject);
 
+        
         //set random rotation so AIs wander in different directions
         transform.forward = new Vector3(Random.Range(-180, 180), 0, Random.Range(-180, 180));
 
@@ -61,6 +61,7 @@ public class AIScript : MonoBehaviour
         updatePlayerCount();
         updateSeeker();
         CheckVisionRadius();
+        agent.speed = isSeeker ? moveSpeed : moveSpeed + bonusMoveSpeed;
         Move();
     }
 
@@ -116,8 +117,16 @@ public class AIScript : MonoBehaviour
     //Wander around until character is in vision radius
     Vector3 Wander()
     {
-        Vector3 wander = Vector3.zero;
-        wander = transform.position + transform.forward + new Vector3(Random.insideUnitCircle.x, 0, Random.insideUnitCircle.y);
+        if (Vector2.Distance(new Vector2(destination.transform.position.x, destination.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < 4)
+        {
+            wander = Vector3.zero;
+            wander = new Vector3(Random.Range(-20, 20), 0, Random.Range(-20, 20));
+        }
+        else
+        {
+            
+        }
+        //wander = transform.position + transform.forward + new Vector3(Random.insideUnitCircle.x, 0, Random.insideUnitCircle.y);
         //wander = transform.position + transform.forward + new Vector3(Random.Range(-7, 7), 0, Random.Range(-7, 7));
         wander -= transform.position;
         return new Vector3(wander.x, 0, wander.z);
@@ -127,21 +136,16 @@ public class AIScript : MonoBehaviour
     Vector3 Pursuit()
     {
         Vector3 pursuit = Vector3.zero;
-        GameObject obj = null;
-        if (inVision.Count >= 1)
+        //GameObject obj = null;
+        if (inVision.Count == 1)
             obj = inVision[0];
         if (inVision.Count > 1)
         {
-            for (int i = 1; i < inVision.Count - 2; ++i)
-            {
-                if (Vector3.Distance(obj.transform.position, transform.position) > Vector3.Distance(inVision[i].transform.position, transform.position) )
-                    obj = inVision[i];
-            }
+            obj = findClosest(inVision);
         }
         if (obj != null)
         {
             pursuit = obj.transform.position - transform.position;
-            playerDist = Vector3.Distance(obj.transform.position, gameObject.transform.position);
         }
         
 
@@ -170,5 +174,16 @@ public class AIScript : MonoBehaviour
         return new Vector3(flee.x, 0, flee.z);
     }
 
+    GameObject findClosest(List<GameObject> list)
+    {
+        GameObject closest = list[0];
+        Vector2 myPos = new Vector2(transform.position.x, transform.position.z);
+        for (int i = 0; i < list.Count; ++i)
+        {
+            if (Vector2.Distance(new Vector2(closest.transform.position.x, closest.transform.position.z), myPos) > Vector2.Distance(new Vector2(list[i].transform.position.x, list[i].transform.position.z), myPos))
+                closest = list[i];
+        }
 
+        return closest;
+    }
 }

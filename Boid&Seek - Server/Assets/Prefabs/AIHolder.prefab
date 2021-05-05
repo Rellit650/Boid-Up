@@ -139,7 +139,7 @@ MonoBehaviour:
   allAI: []
   playerDist: 0
   luckValue: 0
-  visionRadius: 15
+  visionRadius: 55
 --- !u!136 &7377165549409886129
 CapsuleCollider:
   m_ObjectHideFlags: 0

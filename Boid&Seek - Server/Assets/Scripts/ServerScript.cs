@@ -406,7 +406,10 @@ public class ServerScript : MonoBehaviour
                                 }
                             case 6: //spawn 1 singular AI
                                 {
-                                    Instantiate(AIPrefab, new Vector3(0, 1, 0), Quaternion.identity);
+                                    for (int i = 0; i < castRef.commandVariable; ++i)
+                                    {
+                                        Instantiate(AIPrefab, new Vector3(i, 1, i), Quaternion.identity);
+                                    }
                                     break;
                                 }
                             default:
