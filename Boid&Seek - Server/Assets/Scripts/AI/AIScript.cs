@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
+using System.IO;
+using System;
 
 public class AIScript : MonoBehaviour
 {
-    public float moveSpeed = 9f, bonusMoveSpeed = 3f;
+    string path = "Assets/Resources/AIdata.txt";
+    float moveSpeed = 9f, bonusMoveSpeed = 3f;
     public bool isSeeker = false;
     [HideInInspector]
     public GameObject destination, theServer;
@@ -16,7 +18,7 @@ public class AIScript : MonoBehaviour
     GameObject theSeeker = null;
     NavMeshAgent agent;
     Vector3 wander;
-    float luckValue, visionRadius = 200;
+    float visionRadius = 200;
     float WanderWeight = 1, AIweight = 2;
     public GameObject obj;
     // Start is called before the first frame update
@@ -27,14 +29,36 @@ public class AIScript : MonoBehaviour
         //theServer.GetComponent<ServerScript>().allAI.Add(this.gameObject);
         theServer.GetComponent<ServerScript>().spawnAI(this.gameObject);
 
-        
+
         //set random rotation so AIs wander in different directions
-        transform.forward = new Vector3(Random.Range(-180, 180), 0, Random.Range(-180, 180));
+        transform.forward = new Vector3(UnityEngine.Random.Range(-180, 180), 0, UnityEngine.Random.Range(-180, 180));
 
         //find all AI and Players in game
         updatePlayerCount();
         updateSeeker();
-        
+
+        //read from file move speed
+        StreamReader reader = new StreamReader(path);
+        if (!reader.EndOfStream)
+        {
+            string str = reader.ReadLine();
+            string[] array = str.Split(':');
+            moveSpeed = (float)Convert.ToDouble(array[1]);
+        }
+        //read from file move speed bonus
+        if (!reader.EndOfStream)
+        {
+            string str = reader.ReadLine();
+            string[] array = str.Split(':');
+            bonusMoveSpeed = (float)Convert.ToDouble(array[1]);
+        }
+        //read from file view radius
+        if (!reader.EndOfStream)
+        {
+            string str = reader.ReadLine();
+            string[] array = str.Split(':');
+            visionRadius = (float)Convert.ToDouble(array[1]);
+        }
     }
 
     public void updatePlayerCount()
@@ -61,7 +85,7 @@ public class AIScript : MonoBehaviour
         updatePlayerCount();
         updateSeeker();
         CheckVisionRadius();
-        agent.speed = isSeeker ? moveSpeed : moveSpeed + bonusMoveSpeed;
+        agent.speed = isSeeker ? moveSpeed + bonusMoveSpeed : moveSpeed;
         Move();
     }
 
@@ -120,7 +144,7 @@ public class AIScript : MonoBehaviour
         if (Vector2.Distance(new Vector2(destination.transform.position.x, destination.transform.position.z), new Vector2(transform.position.x, transform.position.z)) < 4)
         {
             wander = Vector3.zero;
-            wander = new Vector3(Random.Range(-20, 20), 0, Random.Range(-20, 20));
+            wander = new Vector3(UnityEngine.Random.Range(-20, 20), 0, UnityEngine.Random.Range(-20, 20));
         }
         else
         {
